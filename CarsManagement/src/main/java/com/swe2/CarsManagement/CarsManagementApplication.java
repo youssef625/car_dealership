@@ -1,12 +1,13 @@
-package com.swe2;
+package com.swe2.CarsManagement;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
-public class UserManagement {
-    public static void main(String[] args) {
-        SpringApplication.run(UserManagement.class, args);
-    }
 
+
+@SpringBootApplication
+public class CarsManagementApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(CarsManagementApplication.class,args);
+    }
 }
