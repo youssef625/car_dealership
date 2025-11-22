@@ -1,6 +1,5 @@
 package com.swe2.service;
 
-
 import com.swe2.model.Enum.Role;
 import com.swe2.model.dto.UserCreateRequest;
 
@@ -41,8 +40,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<User> getUsersByRoleId(Integer roleId) {
-        return userRepository.findByRole_Id(roleId);
+    public List<User> getUsersByRole(Role role) {
+        return userRepository.findByRole(role);
     }
 
     @Transactional
@@ -105,6 +104,5 @@ public class UserService {
         }
         userRepository.deleteById(id);
     }
-
 
 }

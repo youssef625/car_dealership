@@ -1,6 +1,7 @@
 package com.swe2.controller;
 
 import com.swe2.model.dto.UserCreateRequest;
+import com.swe2.model.Enum.Role;
 import com.swe2.model.entity.User;
 import com.swe2.service.UserService;
 import jakarta.validation.Valid;
@@ -19,13 +20,11 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Integer id) {
@@ -37,7 +36,6 @@ public class UserController {
         }
     }
 
-
     @GetMapping("/email/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
         try {
@@ -48,13 +46,16 @@ public class UserController {
         }
     }
 
-
-    @GetMapping("/role/{roleId}")
-    public ResponseEntity<List<User>> getUsersByRoleId(@PathVariable Integer roleId) {
-        List<User> users = userService.getUsersByRoleId(roleId);
-        return ResponseEntity.ok(users);
+    @GetMapping("/role/{roleName}")
+    public ResponseEntity<List<User>> getUsersByRole(@PathVariable String roleName) {
+        try {
+            Role role = Role.valueOf(roleName);
+            List<User> users = userService.getUsersByRole(role);
+            return ResponseEntity.ok(users);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
-
 
     @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody UserCreateRequest request) {
@@ -65,7 +66,6 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
     }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(
@@ -79,7 +79,6 @@ public class UserController {
         }
     }
 
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
         try {
@@ -89,7 +88,6 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
     }
-
 
     @GetMapping("/health")
     public ResponseEntity<String> health() {
