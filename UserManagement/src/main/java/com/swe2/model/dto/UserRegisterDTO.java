@@ -1,18 +1,17 @@
-package com.swe2.Authentication.model;
+package com.swe2.model.dto;
 
-import com.swe2.Authentication.Enum.Role;
+import com.swe2.model.Enum.Role;
 
-
-public class RegisterRequest {
+public class UserRegisterDTO {
     private String name;
     private String email;
     private String password;
     private Role roleId = Role.user;
 
-    public RegisterRequest() {
+    public UserRegisterDTO() {
     }
 
-    public RegisterRequest(String name, String email, String password, Role roleId) {
+    public UserRegisterDTO(String name, String email, String password, Role roleId) {
         this.name = name;
         this.email = email;
         this.password = password;

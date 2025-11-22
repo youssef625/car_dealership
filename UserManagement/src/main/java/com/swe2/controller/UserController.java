@@ -2,8 +2,10 @@ package com.swe2.controller;
 
 import com.swe2.model.dto.UserCreateRequest;
 import com.swe2.model.Enum.Role;
+import com.swe2.model.dto.UserRegisterDTO;
 import com.swe2.model.entity.User;
 import com.swe2.service.UserService;
+import com.swe2.service.RequestsService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -27,6 +30,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private RequestsService requestservice;
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
@@ -66,7 +72,9 @@ public class UserController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<?> createUser(@Valid @RequestBody UserCreateRequest request) {
+    public ResponseEntity<?> createUser( @RequestBody UserRegisterDTO requestDTO) {
+        UserCreateRequest request = requestservice.Validate( requestservice.converToDto(requestDTO));
+
         try {
             logger.info("Received user creation request for email: {}", request.getEmail());
             User user = userService.createUser(request);
@@ -114,8 +122,5 @@ public class UserController {
         }
     }
 
-    @GetMapping("/health")
-    public ResponseEntity<String> health() {
-        return ResponseEntity.ok("UserManagement Service is running");
-    }
-}
+
+   }
