@@ -8,3 +8,8 @@ spring:
 eureka:
   client:
     enabled: true
+
+
+jwt:
+  secret: teamEagles
+  expiration: 86400000  # 24 hours in milliseconds
