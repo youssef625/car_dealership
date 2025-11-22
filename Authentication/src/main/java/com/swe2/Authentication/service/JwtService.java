@@ -1,5 +1,6 @@
 package com.swe2.Authentication.service;
 
+import com.swe2.Authentication.Enum.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -25,7 +26,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(Integer userId, String email, String name, String role) {
+    public String generateToken(Integer userId, String email, String name, Role role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("email", email);

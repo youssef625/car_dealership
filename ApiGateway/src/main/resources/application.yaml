@@ -26,6 +26,8 @@ spring:
           predicates:
             - Path=/api/cars/**
 
+
+
 eureka:
   client:
     service-url:

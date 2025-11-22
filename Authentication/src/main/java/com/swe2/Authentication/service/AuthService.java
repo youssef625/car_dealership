@@ -1,9 +1,6 @@
 package com.swe2.Authentication.service;
 
-import com.swe2.Authentication.model.LoginRequest;
-import com.swe2.Authentication.model.LoginResponse;
-import com.swe2.Authentication.model.TokenValidationResponse;
-import com.swe2.Authentication.model.User;
+import com.swe2.Authentication.model.*;
 import com.swe2.Authentication.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,24 +19,21 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
     public LoginResponse login(LoginRequest request) {
-        // Fetch user from UserManagement service via repository
         User user = userRepository.findByEmail(request.getEmail());
 
         if (user == null) {
             throw new RuntimeException("Invalid email or password");
         }
 
-        // Verify password
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
 
-        // Generate JWT token
         String token = jwtService.generateToken(
                 user.getId(),
                 user.getEmail(),
                 user.getName(),
-                user.getRoleName()
+                user.getRole()
         );
 
         return new LoginResponse(
@@ -47,10 +41,32 @@ public class AuthService {
                 user.getId(),
                 user.getEmail(),
                 user.getName(),
-                user.getRoleName()
+                user.getRole()
         );
     }
 
+    public LoginResponse register(RegisterRequest request){
+
+        User user = userRepository.registerUser(request);
+        if (user == null) {
+            throw new RuntimeException("Invalid email or password");
+        }
+        String token = jwtService.generateToken(
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getRole()
+        );
+
+        return new LoginResponse(
+                token,
+                user.getId(),
+                user.getEmail(),
+                user.getName(),
+                user.getRole()
+        );
+
+    }
     public TokenValidationResponse validateToken(String token) {
         try {
             if (jwtService.validateToken(token)) {

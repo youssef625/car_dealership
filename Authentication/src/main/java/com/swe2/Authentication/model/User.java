@@ -1,11 +1,13 @@
 package com.swe2.Authentication.model;
 
+import com.swe2.Authentication.Enum.Role;
+
 public class User {
     private Integer id;
     private String name;
     private String email;
     private String password; // hashed password
-    private String roleName;
+    private Role role;
 
     public User() {}
 
@@ -22,7 +24,7 @@ public class User {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
-    public String getRoleName() { return roleName; }
-    public void setRoleName(String roleName) { this.roleName = roleName; }
+    public Role getRole() { return role; }
+    public void setRoleName(Role role) { this.role = role; }
 }
 
