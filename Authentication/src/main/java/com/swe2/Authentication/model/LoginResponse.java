@@ -1,6 +1,5 @@
 package com.swe2.Authentication.model;
 
-
 public class LoginResponse {
     private String token;
     private String type = "Bearer";
@@ -19,6 +18,7 @@ public class LoginResponse {
         this.role = role;
     }
 
+    // Getters and Setters
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
 

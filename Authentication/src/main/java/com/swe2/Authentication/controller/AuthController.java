@@ -1,6 +1,5 @@
 package com.swe2.Authentication.controller;
 
-
 import com.swe2.Authentication.model.LoginRequest;
 import com.swe2.Authentication.model.LoginResponse;
 import com.swe2.Authentication.model.TokenValidationResponse;
@@ -12,13 +11,16 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*") // Configure properly in production
 public class AuthController {
 
     @Autowired
     private AuthService authService;
 
-
+    /**
+     * Login endpoint
+     * POST /api/auth/login
+     */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         try {
@@ -29,11 +31,16 @@ public class AuthController {
         }
     }
 
-
+    /**
+     * Token validation endpoint
+     * GET /api/auth/validate
+     * Header: Authorization: Bearer <token>
+     */
     @GetMapping("/validate")
     public ResponseEntity<TokenValidationResponse> validateToken(
             @RequestHeader("Authorization") String authHeader) {
         try {
+            // Remove "Bearer " prefix
             String token = authHeader.replace("Bearer ", "");
             TokenValidationResponse response = authService.validateToken(token);
 
@@ -48,4 +55,12 @@ public class AuthController {
         }
     }
 
+    /**
+     * Health check endpoint
+     * GET /api/auth/health
+     */
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Authentication Service is running");
+    }
 }
