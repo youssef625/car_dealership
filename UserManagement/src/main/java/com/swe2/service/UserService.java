@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,19 +50,18 @@ public class UserService {
     @Transactional
     public RegisterResponse createUser(UserCreateRequest request) {
 
-        boolean is_existingUser = userRepository.existsByEmail(request.getEmail());
-        if (is_existingUser) {
-            List<String> errors = List.of("email")
-                    .stream()
-                    .map(field -> field + ": user already registered")
-                    .collect(Collectors.toList());
-            return new RegisterResponse(errors);
+        Optional<User> existingUserOpt = userRepository.findByEmail(request.getEmail());
+        if (existingUserOpt.isPresent()) {
+            User existingUser = existingUserOpt.get();
+            if (existingUser.isBanned()) { // adjust getter if your entity uses a different name
+                return new RegisterResponse(List.of("email: user is banned"));
+            }
+            return new RegisterResponse(List.of("email: user already registered"));
         }
 
 
         Role role = request.getRoleId();
 
-        // Hash password
         String hashedPassword = passwordEncoder.encode(request.getPassword());
 
         // Create user

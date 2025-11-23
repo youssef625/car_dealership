@@ -28,6 +28,9 @@ public class User {
     @Column(name = "createdAt", updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "banned", nullable = false)
+    private boolean banned = false;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -59,4 +62,12 @@ public class User {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public boolean isBanned() {
+        return banned;
+    }
+
+    public void setBanned(boolean banned) {
+        this.banned = banned;
+    }
 }

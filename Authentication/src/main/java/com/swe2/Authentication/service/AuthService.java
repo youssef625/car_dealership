@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class AuthService {
 
@@ -23,6 +25,11 @@ public class AuthService {
 
         if (user == null) {
             throw new RuntimeException("Invalid email or password");
+        }
+
+        // check if user is banned
+        if (user.isBanned()) {
+           return new LoginResponse(List.of("email: user is banned"));
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {

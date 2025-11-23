@@ -9,6 +9,9 @@ public class User {
     protected String password; // hashed password
     protected Role role;
 
+    // Add banned flag so Feign deserializes it from UserManagement responses
+    protected boolean banned = false;
+
     public User() {}
 
     // Getters and Setters
@@ -26,5 +29,10 @@ public class User {
 
     public Role getRole() { return role; }
     public void setRoleName(Role role) { this.role = role; }
+
+    public boolean isBanned() {
+        return banned;
+    }
 }
+
 

@@ -2,6 +2,8 @@ package com.swe2.Authentication.model;
 
 import com.swe2.Authentication.Enum.Role;
 
+import java.util.List;
+
 public class LoginResponse {
     private String token;
     private String type = "Bearer";
@@ -9,15 +11,20 @@ public class LoginResponse {
     private String email;
     private String name;
     private Role role;
+    private List<String> errors;
 
     public LoginResponse() {}
 
     public LoginResponse(String token, Integer userId, String email, String name, Role role) {
+
         this.token = token;
         this.userId = userId;
         this.email = email;
         this.name = name;
         this.role = role;
+    }
+    public LoginResponse(List<String> errors) {
+        this.errors = errors;
     }
 
     // Getters and Setters
@@ -38,4 +45,15 @@ public class LoginResponse {
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
+
+    public List<String> getErrors() {
+        return errors;
+    }
+
+    public boolean hasErrors() {
+        return errors != null && !errors.isEmpty();
+    }
+    public void setErrors(List<String> errors) {
+        this.errors = errors;
+    }
 }

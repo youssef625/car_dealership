@@ -68,4 +68,7 @@ public class RegisterResponse {
     public void setErrors(List<String> errors) {
         this.errors = errors;
     }
+    public boolean hasErrors() {
+        return errors != null && !errors.isEmpty();
+    }
 }

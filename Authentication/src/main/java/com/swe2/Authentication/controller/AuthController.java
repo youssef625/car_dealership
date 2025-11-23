@@ -18,9 +18,12 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public Object login(@RequestBody LoginRequest request) {
         try {
             LoginResponse response = authService.login(request);
+            if(response.hasErrors()){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response.getErrors());
+            }
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -49,9 +52,9 @@ public class AuthController {
     public Object register(@RequestBody RegisterRequest request){
         try {
             RegisterResponse response = authService.register(request);
-            if(response.getErrors().isEmpty()) return ResponseEntity.ok(response);
+            if(!response.hasErrors()) return ResponseEntity.ok(response);
 
-            return response.getErrors();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response.getErrors());
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
