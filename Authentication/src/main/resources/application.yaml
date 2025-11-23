@@ -11,5 +11,5 @@ eureka:
 
 
 jwt:
-  secret: teamEagles
-  expiration: 86400000  # 24 hours in milliseconds
+  secret: 92a19c3b1821c881e7cc75cc58060cd7
+  expiration: 86400000

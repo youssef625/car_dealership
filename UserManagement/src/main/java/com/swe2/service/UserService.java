@@ -1,6 +1,7 @@
 package com.swe2.service;
 
 import com.swe2.model.Enum.Role;
+import com.swe2.model.dto.RegisterResponse;
 import com.swe2.model.dto.UserCreateRequest;
 
 import com.swe2.model.entity.User;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -45,13 +47,18 @@ public class UserService {
     }
 
     @Transactional
-    public User createUser(UserCreateRequest request) {
-        // Check if email already exists
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("User already exists with email: " + request.getEmail());
+    public RegisterResponse createUser(UserCreateRequest request) {
+
+        boolean is_existingUser = userRepository.existsByEmail(request.getEmail());
+        if (is_existingUser) {
+            List<String> errors = List.of("email")
+                    .stream()
+                    .map(field -> field + ": user already registered")
+                    .collect(Collectors.toList());
+            return new RegisterResponse(errors);
         }
 
-        // Get role
+
         Role role = request.getRoleId();
 
         // Hash password
@@ -59,9 +66,9 @@ public class UserService {
 
         // Create user
         User user = new User(request.getName(), request.getEmail(), hashedPassword, role);
-        User savedUser = userRepository.save(user);
+        User savedUser =  userRepository.save(user);
 
-        return savedUser;
+        return new RegisterResponse( savedUser);
     }
 
     @Transactional

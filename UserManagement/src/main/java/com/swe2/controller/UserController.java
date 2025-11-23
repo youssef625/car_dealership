@@ -1,17 +1,17 @@
 package com.swe2.controller;
 
+import com.swe2.model.dto.RegisterResponse;
 import com.swe2.model.dto.UserCreateRequest;
 import com.swe2.model.Enum.Role;
-import com.swe2.model.dto.UserRegisterDTO;
 import com.swe2.model.entity.User;
 import com.swe2.service.UserService;
-import com.swe2.service.RequestsService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -30,9 +30,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private RequestsService requestservice;
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
@@ -72,13 +69,21 @@ public class UserController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<?> createUser( @RequestBody UserRegisterDTO requestDTO) {
-        UserCreateRequest request = requestservice.Validate( requestservice.converToDto(requestDTO));
+    public ResponseEntity<?> createUser(@Valid @RequestBody UserCreateRequest request, BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            // Return all validation errors as a list of messages
+           List<String> errors = bindingResult.getFieldErrors()
+                    .stream()
+                    .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(new  RegisterResponse (errors));
+        }
+
 
         try {
-            logger.info("Received user creation request for email: {}", request.getEmail());
-            User user = userService.createUser(request);
-            logger.info("Successfully created user with id: {}", user.getId());
+            RegisterResponse user =  userService.createUser(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(user);
         } catch (RuntimeException e) {
             logger.error("Error creating user: {}", e.getMessage(), e);
@@ -122,5 +127,4 @@ public class UserController {
         }
     }
 
-
-   }
+}

@@ -1,9 +1,6 @@
 package com.swe2.Authentication.controller;
 
-import com.swe2.Authentication.model.LoginRequest;
-import com.swe2.Authentication.model.LoginResponse;
-import com.swe2.Authentication.model.RegisterRequest;
-import com.swe2.Authentication.model.TokenValidationResponse;
+import com.swe2.Authentication.model.*;
 import com.swe2.Authentication.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -49,10 +46,12 @@ public class AuthController {
         }
     }
     @PostMapping("/register")
-    public ResponseEntity<LoginResponse>  register(@RequestBody RegisterRequest request){
+    public Object register(@RequestBody RegisterRequest request){
         try {
-            LoginResponse response = authService.register(request);
-            return ResponseEntity.ok(response);
+            RegisterResponse response = authService.register(request);
+            if(response.getErrors().isEmpty()) return ResponseEntity.ok(response);
+
+            return response.getErrors();
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }

@@ -45,26 +45,28 @@ public class AuthService {
         );
     }
 
-    public LoginResponse register(RegisterRequest request){
+    public RegisterResponse register(RegisterRequest request){
 
-        User user = userRepository.registerUser(request);
-        if (user == null) {
-            throw new RuntimeException("Invalid email or password");
+        try {
+
+
+            RegisterResponse response = userRepository.registerUser(request);
+            if (response.getErrors() != null && !response.getErrors().isEmpty()) {
+                return response;
+            }
+            String token = jwtService.generateToken(
+                    response.getId(),
+                    response.getEmail(),
+                    response.getName(),
+                    response.getRole()
+            );
+            response.token = token;
+
+            return response;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        String token = jwtService.generateToken(
-                user.getId(),
-                user.getEmail(),
-                user.getName(),
-                user.getRole()
-        );
 
-        return new LoginResponse(
-                token,
-                user.getId(),
-                user.getEmail(),
-                user.getName(),
-                user.getRole()
-        );
 
     }
     public TokenValidationResponse validateToken(String token) {

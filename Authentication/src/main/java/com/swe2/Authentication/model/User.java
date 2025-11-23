@@ -3,11 +3,11 @@ package com.swe2.Authentication.model;
 import com.swe2.Authentication.Enum.Role;
 
 public class User {
-    private Integer id;
-    private String name;
-    private String email;
-    private String password; // hashed password
-    private Role role;
+    protected Integer id;
+    protected String name;
+    protected String email;
+    protected String password; // hashed password
+    protected Role role;
 
     public User() {}
 
