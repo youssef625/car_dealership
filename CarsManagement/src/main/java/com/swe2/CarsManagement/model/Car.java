@@ -15,23 +15,28 @@ public class Car {
     private int year;
     private double price;
     private String description;
-    private boolean available = true;
 
-    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
-    private List<Offer> offers;
+    @Enumerated(EnumType.STRING)
+    private CarStatus status = CarStatus.AVAILABLE;
+
+    @ElementCollection
+    private List<String> images; 
 
     public Car() {}
 
-    public Car(Long id, String make, String model, int year, double price, String description, boolean available) {
+    public Car(Long id, String make, String model, int year, double price,
+               String description, CarStatus status, List<String> images) {
         this.id = id;
         this.make = make;
         this.model = model;
         this.year = year;
         this.price = price;
         this.description = description;
-        this.available = available;
+        this.status = status;
+        this.images = images;
     }
 
+    // Getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -50,9 +55,9 @@ public class Car {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public boolean isAvailable() { return available; }
-    public void setAvailable(boolean available) { this.available = available; }
+    public CarStatus getStatus() { return status; }
+    public void setStatus(CarStatus status) { this.status = status; }
 
-    public List<Offer> getOffers() { return offers; }
-    public void setOffers(List<Offer> offers) { this.offers = offers; }
+    public List<String> getImages() { return images; }
+    public void setImages(List<String> images) { this.images = images; }
 }

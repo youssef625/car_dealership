@@ -1,9 +1,13 @@
 package com.swe2.CarsManagement.controller;
 
 import com.swe2.CarsManagement.model.Car;
+import com.swe2.CarsManagement.model.CarStatus;
 import com.swe2.CarsManagement.service.CarService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,11 +16,8 @@ import java.util.List;
 @RequestMapping("/api/cars")
 public class CarController {
 
-    private final CarService carService;
-
-    public CarController(CarService carService) {
-        this.carService = carService;
-    }
+    @Autowired
+    private CarService carService;
 
     @GetMapping
     public ResponseEntity<List<Car>> getAllCars() {
@@ -38,6 +39,12 @@ public class CarController {
     @PutMapping("/{id}")
     public ResponseEntity<Car> updateCar(@PathVariable Long id, @RequestBody Car car) {
         return ResponseEntity.ok(carService.updateCar(id, car));
+    }
+
+    @PutMapping("/{id}/status/{status}")
+    public ResponseEntity<Car> updateStatus(@PathVariable Long id,
+                                            @PathVariable CarStatus status) {
+        return ResponseEntity.ok(carService.updateStatus(id, status));
     }
 
     @DeleteMapping("/{id}")
