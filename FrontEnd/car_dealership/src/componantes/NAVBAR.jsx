@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import 'bootstrap-icons/font/bootstrap-icons.css'; 
 
 const NAVBAR = () => {
@@ -7,10 +8,10 @@ const NAVBAR = () => {
       <div className="container-fluid">
 
         {/* Left: Car icon + Brand */}
-        <a className="navbar-brand d-flex align-items-center" href="#">
+        <Link className="navbar-brand d-flex align-items-center" to="/">
           <i className="bi bi-car-front-fill me-2" style={{ fontSize: '1.5rem' }}></i>
           Car Dealership
-        </a>
+        </Link>
 
         {/* Toggler for mobile */}
         <button
@@ -29,24 +30,24 @@ const NAVBAR = () => {
         <div className="collapse navbar-collapse justify-content-center" id="navbarNav">
           <ul className="navbar-nav">
             <li className="nav-item">
-              <a className="nav-link active" href="#">Home</a>
+              <Link className="nav-link" to="/">Home</Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#">Our Products</a>
+              <Link className="nav-link" to="/products">Our Products</Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#">Contact Us</a>
+              <Link className="nav-link" to="/contact">Contact Us</Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#">About Us</a>
+              <Link className="nav-link" to="/about">About Us</Link>
             </li>
           </ul>
         </div>
 
         {/* Right: Login / Signup */}
         <div className="d-flex ms-auto">
-          <button className="btn btn-outline-primary me-2">Login</button>
-          <button className="btn btn-primary">Signup</button>
+          <Link to="/login" className="btn btn-outline-primary me-2">Login</Link>
+          <Link to="/signup" className="btn btn-primary">Signup</Link>
         </div>
 
       </div>

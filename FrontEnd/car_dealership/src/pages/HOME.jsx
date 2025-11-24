@@ -2,6 +2,8 @@ import React from 'react';
 import NAVBAR from '../componantes/NAVBAR.jsx';
 import HERO from '../componantes/HERO.jsx';
 import FEATURES from '../componantes/FEATURES.jsx';
+import JUMB from '../componantes/JUMB.jsx';
+import FOOTER from '../componantes/FOOTER.jsx';
 
 const HOME = () => {
   return (
@@ -17,6 +19,9 @@ const HOME = () => {
       <div className="w-100 bg-light">
         <FEATURES />
       </div>
+      <JUMB />
+      {/* Footer */}
+      <FOOTER />
     </>
   );
 };
