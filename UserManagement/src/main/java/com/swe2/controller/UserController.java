@@ -37,16 +37,6 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Integer id) {
-        try {
-            User user = userService.getUserById(id);
-            return ResponseEntity.ok(user);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
     @GetMapping("/email/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
         try {
@@ -80,8 +70,6 @@ public class UserController {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(new  RegisterResponse (errors));
         }
-
-
         try {
             RegisterResponse user =  userService.createUser(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(user);
@@ -105,26 +93,39 @@ public class UserController {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(
-            @PathVariable Integer id,
-            @Valid @RequestBody UserCreateRequest request) {
+    @GetMapping("/ban/{id}")
+    public ResponseEntity<User> ban(
+            @PathVariable Integer id) {
         try {
-            User user = userService.updateUser(id, request);
+            User user = userService.banUser(id);
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    @GetMapping("/unban/{id}")
+    public ResponseEntity<User> unBan(
+            @PathVariable Integer id) {
+        try {
+            User user = userService.unBanUser(id);
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
+    @GetMapping("/resetPassword/{id}/{newPassword}")
+    public ResponseEntity<User> resetPassword(
+            @PathVariable Integer id,
+            @PathVariable String newPassword) {
         try {
-            userService.deleteUser(id);
-            return ResponseEntity.noContent().build();
+            User user = userService.resetPassword(id, newPassword);
+            return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().build();
         }
     }
+
+
 
 }

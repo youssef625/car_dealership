@@ -30,12 +30,6 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User getUserById(Integer id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-    }
-
-    @Transactional(readOnly = true)
     public User getUserByEmail(String email) {
 
         return userRepository.findByEmail(email)
@@ -72,44 +66,38 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUser(Integer id, UserCreateRequest request) {
+    public User banUser(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
 
-        // Update fields if provided
-        if (request.getName() != null && !request.getName().isEmpty()) {
-            user.setName(request.getName());
-        }
 
-        if (request.getEmail() != null && !request.getEmail().isEmpty()) {
-            // Check if new email is already taken by another user
-            if (userRepository.existsByEmail(request.getEmail()) &&
-                    !user.getEmail().equals(request.getEmail())) {
-                throw new RuntimeException("Email already exists: " + request.getEmail());
-            }
-            user.setEmail(request.getEmail());
-        }
-
-        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
-            String hashedPassword = passwordEncoder.encode(request.getPassword());
-            user.setPassword(hashedPassword);
-        }
-
-        if (request.getRoleId() != null) {
-            Role role = request.getRoleId();
-            user.setRole(role);
-        }
+        user.setBanned(true);
 
         User updatedUser = userRepository.save(user);
         return updatedUser;
     }
 
-    @Transactional
-    public void deleteUser(Integer id) {
-        if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found with id: " + id);
-        }
-        userRepository.deleteById(id);
+    public User unBanUser(Integer id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+
+
+        user.setBanned(false);
+
+        User updatedUser = userRepository.save(user);
+        return updatedUser;
+    }
+
+
+    public User resetPassword(Integer id, String newPassword) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+
+        String hashedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(hashedPassword);
+
+        User updatedUser = userRepository.save(user);
+        return updatedUser;
     }
 
 }
