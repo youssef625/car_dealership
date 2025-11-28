@@ -17,6 +17,8 @@ import PRODUCTES from './pages/PRODUCTES';
 import PRODUCT_PAGE from './pages/PRODUCT_PAGE';
 import ABOUTUS from './pages/ABOUTUS';
 import CONTACTUS from './pages/CONTACTUS';
+import ADMIN from './componantes/ADMIN_NAV';
+import AddEmp from './pages/Dashboard/AddEmp';
 // Components
 import NAVBAR from './componantes/NAVBAR';
 
@@ -33,7 +35,8 @@ function App() {
           <Route path="/car/:id" element={<PRODUCT_PAGE />} />
           <Route path="/about" element={<ABOUTUS />} />
           <Route path="/contact" element={<CONTACTUS />} />
-
+          <Route path="/admin" element={<ADMIN />} />
+          <Route path="/admin/add-employee" element={<AddEmp />} />
         </Routes>
     </BrowserRouter>
   );
