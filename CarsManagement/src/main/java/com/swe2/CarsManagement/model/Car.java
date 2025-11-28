@@ -4,23 +4,37 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
+@Table(name = "cars") 
 public class Car {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String make;
+
+    @Column(nullable = false)
     private String model;
+
     private int year;
+
     private double price;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private CarStatus status = CarStatus.AVAILABLE;
 
     @ElementCollection
-    private List<String> images; 
+    @CollectionTable(
+            name = "car_images",
+            joinColumns = @JoinColumn(name = "car_id")
+    )
+    @Column(name = "image_url")
+    private List<String> images;
 
     public Car() {}
 
@@ -36,7 +50,6 @@ public class Car {
         this.images = images;
     }
 
-    // Getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
