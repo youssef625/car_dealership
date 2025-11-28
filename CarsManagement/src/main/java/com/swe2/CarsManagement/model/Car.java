@@ -17,8 +17,10 @@ public class Car {
     @Column(nullable = false)
     private String model;
 
+    @Column(nullable = false)
     private int year;
 
+    @Column(nullable = false)
     private double price;
 
     @Column(columnDefinition = "TEXT")
