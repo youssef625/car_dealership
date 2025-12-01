@@ -8,3 +8,8 @@ spring:
 eureka:
   client:
     enabled: true
+
+
+jwt:
+  secret: 92a19c3b1821c881e7cc75cc58060cd7
+  expiration: 86400000

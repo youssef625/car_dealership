@@ -13,18 +13,43 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
+        # Public authentication routes (no filter)
         - id: authentication-service
           uri: lb://AUTHENTICATION
           predicates:
             - Path=/api/auth/**
+        
+        # Ban/Unban operations - superAdmin only
+        - id: user-ban-operations
+          uri: lb://USERMANAGEMENT
+          predicates:
+            - Path=/api/users/ban/**, /api/users/unban/**
+          filters:
+            - name: RoleAuthorizationFilter
+              args:
+                requiredRoles: superadmin
+        
+        # General user management - superAdmin and employee
         - id: user-management-service
           uri: lb://USERMANAGEMENT
           predicates:
             - Path=/api/users/**
+          filters:
+            - name: RoleAuthorizationFilter
+              args:
+                requiredRoles: superadmin,employee
+        
+        # Car management - requires authentication (any authenticated user)
         - id: carMnangement-service
           uri: lb://CARMANAGEMENT
           predicates:
             - Path=/api/cars/**
+          filters:
+            - RoleAuthorizationFilter
+
+
+
+
 
 eureka:
   client:
