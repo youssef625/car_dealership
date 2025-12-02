@@ -11,7 +11,6 @@ spring:
       discovery:
         locator:
           enabled: true
-          lower-case-service-id: true
       routes:
         # Public authentication routes (no filter)
         - id: authentication-service
@@ -27,7 +26,7 @@ spring:
           filters:
             - name: RoleAuthorizationFilter
               args:
-                requiredRoles: superadmin
+                requiredRoles: superAdmin
         
         # General user management - superAdmin and employee
         - id: user-management-service
@@ -37,7 +36,7 @@ spring:
           filters:
             - name: RoleAuthorizationFilter
               args:
-                requiredRoles: superadmin,employee
+                requiredRoles: superAdmin,employee
         
         # Car management - requires authentication (any authenticated user)
         - id: carMnangement-service
@@ -47,6 +46,12 @@ spring:
           filters:
             - RoleAuthorizationFilter
 
+        - id: offers-service
+          uri: lb://OFFERSMANAGEMENT
+          predicates:
+            - Path=/api/offers/**
+          filters:
+            - RoleAuthorizationFilter
 
 
 

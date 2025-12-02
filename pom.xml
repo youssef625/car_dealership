@@ -28,6 +28,7 @@
         <module>ApiGateway</module>
         <module>CarsManagement</module>
         <module>FrontEnd</module>
+        <module>OffersManagement</module>
     </modules>
 
     <scm>

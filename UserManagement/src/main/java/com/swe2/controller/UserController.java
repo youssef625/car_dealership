@@ -3,6 +3,8 @@ package com.swe2.controller;
 import com.swe2.model.dto.RegisterResponse;
 import com.swe2.model.dto.UserCreateRequest;
 import com.swe2.model.Enum.Role;
+import com.swe2.model.dto.UserDTO;
+import com.swe2.model.dto.changePasswordDTO;
 import com.swe2.model.entity.User;
 import com.swe2.service.UserService;
 import jakarta.validation.Valid;
@@ -15,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,18 +35,43 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<Page<UserDTO>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<User> users =   userService.getAllUsers(page, size);
+        Page<UserDTO> userDTOs = users.map(user -> new UserDTO(
+                user
+        ));
+        return ResponseEntity.ok(userDTOs);
     }
 
     @GetMapping("/email/{email}")
-    public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
+    public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email) {
+        try {
+            User user = userService.getUserByEmail(email);
+            return ResponseEntity.ok(new UserDTO(user));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/authdata/{email}")
+    public ResponseEntity<User> getAuthData(@PathVariable String email) {
         try {
             User user = userService.getUserByEmail(email);
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/approve/{id}")
+    public ResponseEntity<User> approveUser(@PathVariable Integer id) {
+        try {
+            User user = userService.approveUser(id);
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -63,15 +91,15 @@ public class UserController {
 
         if (bindingResult.hasErrors()) {
             // Return all validation errors as a list of messages
-           List<String> errors = bindingResult.getFieldErrors()
+            List<String> errors = bindingResult.getFieldErrors()
                     .stream()
                     .map(error -> error.getField() + ": " + error.getDefaultMessage())
                     .collect(Collectors.toList());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(new  RegisterResponse (errors));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterResponse(errors));
         }
         try {
-            RegisterResponse user =  userService.createUser(request);
+            RegisterResponse user = userService.createUser(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(user);
         } catch (RuntimeException e) {
             logger.error("Error creating user: {}", e.getMessage(), e);
@@ -103,23 +131,12 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
     }
+
     @GetMapping("/unban/{id}")
     public ResponseEntity<User> unBan(
             @PathVariable Integer id) {
         try {
             User user = userService.unBanUser(id);
-            return ResponseEntity.ok(user);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @GetMapping("/resetPassword/{id}/{newPassword}")
-    public ResponseEntity<User> resetPassword(
-            @PathVariable Integer id,
-            @PathVariable String newPassword) {
-        try {
-            User user = userService.resetPassword(id, newPassword);
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
