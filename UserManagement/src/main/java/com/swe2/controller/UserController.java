@@ -38,10 +38,9 @@ public class UserController {
     public ResponseEntity<Page<UserDTO>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<User> users =   userService.getAllUsers(page, size);
+        Page<User> users = userService.getAllUsers(page, size);
         Page<UserDTO> userDTOs = users.map(user -> new UserDTO(
-                user
-        ));
+                user));
         return ResponseEntity.ok(userDTOs);
     }
 
@@ -144,5 +143,26 @@ public class UserController {
     }
 
 
+    @PostMapping("/changePassword/")
+    public Object changePassword(@Valid @RequestBody changePasswordDTO request,
+            @RequestHeader("Authorization") String token,
+            BindingResult bindingResult) {
+        try {
+            if (bindingResult.hasErrors())
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getFieldErrors());
+
+
+            List<String> errors = userService.changePassword(request,token);
+
+            if (errors.isEmpty()) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+            }
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
 }

@@ -2,10 +2,14 @@ package com.swe2.service;
 
 import com.swe2.model.Enum.Role;
 import com.swe2.model.dto.RegisterResponse;
+import com.swe2.model.dto.TokenValidationResponse;
 import com.swe2.model.dto.UserCreateRequest;
 
+import com.swe2.model.dto.changePasswordDTO;
 import com.swe2.model.entity.User;
 import com.swe2.repository.UserRepository;
+import com.swe2.repository.tokenValidation;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +31,10 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private tokenValidation jwtValidation ;
+
 
     @Transactional(readOnly = true)
     public Page<User> getAllUsers(int page, int size) {
@@ -90,16 +98,7 @@ public class UserService {
         return updatedUser;
     }
 
-    public User resetPassword(Integer id, String newPassword) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
 
-        String hashedPassword = passwordEncoder.encode(newPassword);
-        user.setPassword(hashedPassword);
-
-        User updatedUser = userRepository.save(user);
-        return updatedUser;
-    }
 
     public User approveUser(Integer id) {
         User user = userRepository.findById(id)
@@ -109,5 +108,24 @@ public class UserService {
 
         User updatedUser = userRepository.save(user);
         return updatedUser;
+    }
+
+    public List<String> changePassword(@Valid changePasswordDTO request, String token) {
+        TokenValidationResponse validationResponse = jwtValidation.validateToken(token);
+        if (!validationResponse.isValid()) {
+            return List.of("token: invalid token");}
+
+        User user = userRepository.findById(validationResponse.getUserId());
+        if (user == null) {
+            return List.of("user: user not found");
+        }
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            return List.of("oldPassword: incorrect old password");
+        }
+        String newHashedPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPassword(newHashedPassword);
+        userRepository.save(user);
+        return List.of();
+
     }
 }
