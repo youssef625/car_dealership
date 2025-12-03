@@ -8,67 +8,67 @@ public class Offer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long offerId;
+    private int offerId;
 
     @Column(nullable = false)
-    private Long carId;
+    private int carId;
 
     @Column(nullable = false)
-    private Long userId;
+    private int userId;
 
     @Column(nullable = false)
-    private Double price;
+    private int price;
 
     @Column(nullable = true)
-    private Long employeeId;
+    private int employeeId;
 
     public Offer() {
     }
 
-    public Offer(Long carId, Long userId, Double price, Long employeeId) {
+    public Offer(int carId, int userId, int price, int employeeId) {
         this.carId = carId;
         this.userId = userId;
         this.price = price;
         this.employeeId = employeeId;
     }
 
-    public Long getOfferId() {
+    public int getOfferId() {
         return offerId;
     }
 
-    public void setOfferId(Long offerId) {
+    public void setOfferId(int offerId) {
         this.offerId = offerId;
     }
 
-    public Long getCarId() {
+    public int getCarId() {
         return carId;
     }
 
-    public void setCarId(Long carId) {
+    public void setCarId(int carId) {
         this.carId = carId;
     }
 
-    public Long getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
-    public Double getPrice() {
+    public int getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(int price) {
         this.price = price;
     }
 
-    public Long getEmployeeId() {
+    public int getEmployeeId() {
         return employeeId;
     }
 
-    public void setEmployeeId(Long employeeId) {
+    public void setEmployeeId(int employeeId) {
         this.employeeId = employeeId;
     }
 }

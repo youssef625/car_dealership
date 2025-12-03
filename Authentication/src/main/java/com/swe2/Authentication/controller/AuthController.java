@@ -61,7 +61,7 @@ public class AuthController {
 
     }
 
-    @PostMapping("admin/register")
+    @PostMapping("/admin/register")
     public Object registerAdmin(@RequestBody RegisterRequest request){
         try {
             RegisterResponse response = authService.registerAdmin(request);

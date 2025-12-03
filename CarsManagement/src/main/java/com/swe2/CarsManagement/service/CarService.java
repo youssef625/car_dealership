@@ -6,6 +6,7 @@ import com.swe2.CarsManagement.repository.CarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,5 +56,29 @@ public class CarService {
 
         car.setStatus(status);
         return carRepository.save(car);
+    }
+
+    public Car addPhotoUrl(Long carId, String photoUrl) {
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new RuntimeException("Car not found with id " + carId));
+
+        if (car.getImages() == null) {
+            car.setImages(new ArrayList<>());
+        }
+
+        car.getImages().add(photoUrl);
+        return carRepository.save(car);
+    }
+
+    public Car removePhotoUrl(Long carId, String photoUrl) {
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new RuntimeException("Car not found with id " + carId));
+
+        if (car.getImages() != null) {
+            car.getImages().remove(photoUrl);
+            return carRepository.save(car);
+        }
+
+        return car;
     }
 }

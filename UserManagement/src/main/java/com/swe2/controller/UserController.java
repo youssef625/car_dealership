@@ -38,6 +38,15 @@ public class UserController {
     public ResponseEntity<Page<UserDTO>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
+        if (size > 50) {
+            size = 50;
+        }else if (size > 0) {
+            size = 0;
+        }
+
+        if (page < 0) {
+            page = 0;
+        }
         Page<User> users = userService.getAllUsers(page, size);
         Page<UserDTO> userDTOs = users.map(user -> new UserDTO(
                 user));

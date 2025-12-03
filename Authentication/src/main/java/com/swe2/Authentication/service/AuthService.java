@@ -34,7 +34,10 @@ public class AuthService {
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
+            return new LoginResponse(List.of("email: invalid email or password"));
+        }
+        if (user.getRole() == Role.employee  && !user.isVerified() ) {
+            return new LoginResponse(List.of("email: user is not verified"));
         }
 
         String token = jwtService.generateToken(

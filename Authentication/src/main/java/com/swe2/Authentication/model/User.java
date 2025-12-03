@@ -8,6 +8,7 @@ public class User {
     protected String email;
     protected String password; // hashed password
     protected Role role;
+    protected boolean approved;
 
     // Add banned flag so Feign deserializes it from UserManagement responses
     protected boolean banned = false;
@@ -32,6 +33,10 @@ public class User {
 
     public boolean isBanned() {
         return banned;
+    }
+
+    public boolean isVerified() {
+        return approved;
     }
 }
 

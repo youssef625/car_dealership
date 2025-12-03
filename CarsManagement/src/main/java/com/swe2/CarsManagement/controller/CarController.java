@@ -1,5 +1,6 @@
 package com.swe2.CarsManagement.controller;
 
+import com.swe2.CarsManagement.dto.PhotoUrlRequest;
 import com.swe2.CarsManagement.model.Car;
 import com.swe2.CarsManagement.model.CarStatus;
 import com.swe2.CarsManagement.service.CarService;
@@ -54,5 +55,18 @@ public class CarController {
     public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
         carService.deleteCar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/photos")
+    public ResponseEntity<Car> addPhotoUrl(@PathVariable Long id,
+            @RequestBody PhotoUrlRequest request) {
+        return ResponseEntity.ok(carService.addPhotoUrl(id, request.getUrl()));
+    }
+
+    @DeleteMapping("/{id}/photos")
+    public ResponseEntity<Car> removePhotoUrl(@PathVariable Long id,
+            @RequestBody PhotoUrlRequest request) {
+        carService.removePhotoUrl(id, request.getUrl());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
