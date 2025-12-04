@@ -83,16 +83,6 @@ public class UserController {
         }
     }
 
-    @GetMapping("/role/{roleName}")
-    public ResponseEntity<List<User>> getUsersByRole(@PathVariable String roleName) {
-        try {
-            Role role = Role.valueOf(roleName);
-            List<User> users = userService.getUsersByRole(role);
-            return ResponseEntity.ok(users);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
 
     @PostMapping("/")
     public ResponseEntity<?> createUser(@Valid @RequestBody UserCreateRequest request, BindingResult bindingResult) {

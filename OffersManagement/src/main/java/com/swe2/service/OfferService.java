@@ -1,6 +1,7 @@
 package com.swe2.service;
 
 import com.swe2.DTO.TokenValidationResponse;
+import com.swe2.DTO.carOfferForUser;
 import com.swe2.DTO.createOfferRequest;
 import com.swe2.model.Offer;
 import com.swe2.repository.OfferRepository;
@@ -33,6 +34,10 @@ public class OfferService {
         newOffer.setUserId(validationResponse.getUserId());
         Offer savedOffer = offerRepository.save(newOffer);
         return List.of();
+    }
+
+    public carOfferForUser getOfferById(Integer id) {
+        return offerRepository.findMaxPriceAndCountByCarId(id);
     }
 }
 

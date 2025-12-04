@@ -1,5 +1,6 @@
 package com.swe2.controller;
 
+import com.swe2.DTO.carOfferForUser;
 import com.swe2.DTO.createOfferRequest;
 import com.swe2.DTO.offerbycar;
 import com.swe2.model.Offer;
@@ -33,6 +34,11 @@ public class OfferController {
             return ResponseEntity.badRequest().body(errors);
         }
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}")
+    public Object getOfferById(@PathVariable Integer id) {
+        return offerService.getOfferById(id);
     }
 
 
