@@ -1,6 +1,6 @@
 package com.swe2.model.entity;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.swe2.model.Enum.Role;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -31,12 +31,16 @@ public class User {
     @Column(name = "banned", nullable = false)
     private boolean banned = false;
 
+    @Column(name="aprroved", nullable = false)
+    private boolean approved = false;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
 
-    public User() {}
+    public User() {
+    }
 
     public User(String name, String email, String password, Role role) {
         this.name = name;
@@ -45,23 +49,53 @@ public class User {
         this.role = role;
     }
 
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    public Integer getId() {
+        return id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getName() {
+        return name;
+    }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
+    public String getEmail() {
+        return email;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
     public boolean isBanned() {
         return banned;
@@ -69,5 +103,12 @@ public class User {
 
     public void setBanned(boolean banned) {
         this.banned = banned;
+    }
+
+    public void setApproved(boolean b) {
+        this.approved = b;
+    }
+    public boolean isApproved() {
+        return approved;
     }
 }

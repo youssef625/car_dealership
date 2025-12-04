@@ -1,5 +1,6 @@
 package com.swe2.CarsManagement.controller;
 
+import com.swe2.CarsManagement.dto.PhotoUrlRequest;
 import com.swe2.CarsManagement.model.Car;
 import com.swe2.CarsManagement.model.CarStatus;
 import com.swe2.CarsManagement.service.CarService;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -20,8 +22,10 @@ public class CarController {
     private CarService carService;
 
     @GetMapping
-    public ResponseEntity<List<Car>> getAllCars() {
-        return ResponseEntity.ok(carService.getAllCars());
+    public ResponseEntity<Page<Car>> getAllCars(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(carService.getAllCars(page, size));
     }
 
     @GetMapping("/{id}")
@@ -43,7 +47,7 @@ public class CarController {
 
     @PutMapping("/{id}/status/{status}")
     public ResponseEntity<Car> updateStatus(@PathVariable Long id,
-                                            @PathVariable CarStatus status) {
+            @PathVariable CarStatus status) {
         return ResponseEntity.ok(carService.updateStatus(id, status));
     }
 
@@ -51,5 +55,18 @@ public class CarController {
     public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
         carService.deleteCar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/photos")
+    public ResponseEntity<Car> addPhotoUrl(@PathVariable Long id,
+            @RequestBody PhotoUrlRequest request) {
+        return ResponseEntity.ok(carService.addPhotoUrl(id, request.getUrl()));
+    }
+
+    @DeleteMapping("/{id}/photos")
+    public ResponseEntity<Car> removePhotoUrl(@PathVariable Long id,
+            @RequestBody PhotoUrlRequest request) {
+        carService.removePhotoUrl(id, request.getUrl());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

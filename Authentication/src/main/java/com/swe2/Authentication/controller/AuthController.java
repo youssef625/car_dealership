@@ -61,5 +61,17 @@ public class AuthController {
 
     }
 
+    @PostMapping("/admin/register")
+    public Object registerAdmin(@RequestBody RegisterRequest request){
+        try {
+            RegisterResponse response = authService.registerAdmin(request);
+            if(!response.hasErrors()) return ResponseEntity.ok(response);
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response.getErrors());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+    }
 
    }

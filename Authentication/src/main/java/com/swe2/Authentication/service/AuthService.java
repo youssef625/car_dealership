@@ -1,5 +1,6 @@
 package com.swe2.Authentication.service;
 
+import com.swe2.Authentication.Enum.Role;
 import com.swe2.Authentication.model.*;
 import com.swe2.Authentication.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,10 @@ public class AuthService {
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
+            return new LoginResponse(List.of("email: invalid email or password"));
+        }
+        if (user.getRole() == Role.employee  && !user.isVerified() ) {
+            return new LoginResponse(List.of("email: user is not verified"));
         }
 
         String token = jwtService.generateToken(
@@ -76,6 +80,33 @@ public class AuthService {
 
 
     }
+
+    public RegisterResponse registerAdmin(RegisterRequest request){
+
+        try {
+
+
+            request.setRoleId(Role.employee);
+            RegisterResponse response = userRepository.registerUser(request);
+            if (response.getErrors() != null && !response.getErrors().isEmpty()) {
+                return response;
+            }
+            String token = jwtService.generateToken(
+                    response.getId(),
+                    response.getEmail(),
+                    response.getName(),
+                    response.getRole()
+            );
+            response.token = token;
+
+            return response;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
     public TokenValidationResponse validateToken(String token) {
         try {
             if (jwtService.validateToken(token)) {

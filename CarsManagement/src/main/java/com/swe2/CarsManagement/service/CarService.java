@@ -6,8 +6,13 @@ import com.swe2.CarsManagement.repository.CarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class CarService {
@@ -15,8 +20,9 @@ public class CarService {
     @Autowired
     private CarRepository carRepository;
 
-    public List<Car> getAllCars() {
-        return carRepository.findAll();
+    public Page<Car> getAllCars(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return carRepository.findAll(pageable);
     }
 
     public Optional<Car> getCarById(Long id) {
@@ -50,5 +56,29 @@ public class CarService {
 
         car.setStatus(status);
         return carRepository.save(car);
+    }
+
+    public Car addPhotoUrl(Long carId, String photoUrl) {
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new RuntimeException("Car not found with id " + carId));
+
+        if (car.getImages() == null) {
+            car.setImages(new ArrayList<>());
+        }
+
+        car.getImages().add(photoUrl);
+        return carRepository.save(car);
+    }
+
+    public Car removePhotoUrl(Long carId, String photoUrl) {
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new RuntimeException("Car not found with id " + carId));
+
+        if (car.getImages() != null) {
+            car.getImages().remove(photoUrl);
+            return carRepository.save(car);
+        }
+
+        return car;
     }
 }
