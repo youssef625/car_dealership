@@ -46,13 +46,6 @@ spring:
           filters:
             - RoleAuthorizationFilter
 
-        - id: offers-service
-          uri: lb://OFFERSMANAGEMENT
-          predicates:
-            - Path=/api/offers/**
-          filters:
-            - RoleAuthorizationFilter
-
 
 
 

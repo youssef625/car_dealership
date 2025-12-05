@@ -34,6 +34,9 @@ public class User {
     @Column(name="aprroved", nullable = false)
     private boolean approved = false;
 
+    @Column(name = "phone", nullable = false)
+    private String phone;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
