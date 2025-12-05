@@ -2,6 +2,7 @@ package com.swe2.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.swe2.model.Enum.Role;
+import com.swe2.util.EmailEncryptionConverter;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -16,11 +17,21 @@ public class User {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, unique = true, length = 500) // Increased for encrypted data
+    @Convert(converter = EmailEncryptionConverter.class)
     private String email;
 
-    @Column(nullable = false, length = 255)
+    @Column(length = 255) // Nullable for OAuth users
     private String password;
+
+    @Column(name = "oauth_provider", length = 50)
+    private String oauthProvider; // "google", "local", null
+
+    @Column(name = "oauth_provider_id", length = 255)
+    private String oauthProviderId; // Google user ID
+
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
 
     @Column(nullable = false, length = 255)
     private Role role;
@@ -31,7 +42,7 @@ public class User {
     @Column(name = "banned", nullable = false)
     private boolean banned = false;
 
-    @Column(name="aprroved", nullable = false)
+    @Column(name = "aprroved", nullable = false)
     private boolean approved = false;
 
     @Column(name = "phone", nullable = false)
@@ -111,7 +122,32 @@ public class User {
     public void setApproved(boolean b) {
         this.approved = b;
     }
+
     public boolean isApproved() {
         return approved;
+    }
+
+    public String getOauthProvider() {
+        return oauthProvider;
+    }
+
+    public void setOauthProvider(String oauthProvider) {
+        this.oauthProvider = oauthProvider;
+    }
+
+    public String getOauthProviderId() {
+        return oauthProviderId;
+    }
+
+    public void setOauthProviderId(String oauthProviderId) {
+        this.oauthProviderId = oauthProviderId;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
     }
 }

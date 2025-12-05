@@ -3,6 +3,7 @@ package com.swe2.CarsManagement.service;
 import com.swe2.CarsManagement.model.Car;
 import com.swe2.CarsManagement.model.CarStatus;
 import com.swe2.CarsManagement.repository.CarRepository;
+import com.swe2.CarsManagement.util.XSSProtectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +21,29 @@ public class CarService {
     @Autowired
     private CarRepository carRepository;
 
+    @Autowired
+    private XSSProtectionUtil xssProtection;
+
     public Page<Car> getAllCars(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return carRepository.findAll(pageable);
+    }
+
+    /**
+     * Search cars by make, model, or year with XSS protection
+     * 
+     * @param searchTerm The search query (will be sanitized)
+     * @param page       Page number
+     * @param size       Page size
+     * @return Page of matching cars
+     */
+    public Page<Car> searchCars(String searchTerm, int page, int size) {
+        // Sanitize search term to prevent XSS attacks
+        String sanitizedTerm = xssProtection.sanitizeSearchQuery(searchTerm);
+
+        // Use parameterized query (protected against SQL injection)
+        Pageable pageable = PageRequest.of(page, size);
+        return carRepository.searchCars(sanitizedTerm, pageable);
     }
 
     public Optional<Car> getCarById(Long id) {

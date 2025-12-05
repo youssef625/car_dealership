@@ -1,9 +1,18 @@
 server:
-  port: 8083
-
-eureka:
-  client:
-    enabled: true
+  port: 8082
+  tomcat:
+    # Connection timeout to prevent slowloris attacks
+    connection-timeout: 20s
+    # Thread pool limits to prevent thread exhaustion
+    threads:
+      max: 200
+      min-spare: 10
+    # Connection limits
+    max-connections: 10000
+    accept-count: 100
+    # Request size limits
+    max-swallow-size: 10MB
+    max-http-request-header-size: 8KB
 
 spring:
   application:
@@ -13,6 +22,15 @@ spring:
     username: root
     password: 12345678
     driver-class-name: com.mysql.cj.jdbc.Driver
+  # Request body size limits
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  # Async request timeout
+  mvc:
+    async:
+      request-timeout: 30000  # 30 seconds
 
   jpa:
     hibernate:
@@ -23,3 +41,6 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
 
+eureka:
+  client:
+    enabled: true

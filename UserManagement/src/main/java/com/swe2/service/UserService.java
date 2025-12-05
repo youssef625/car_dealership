@@ -1,6 +1,7 @@
 package com.swe2.service;
 
 import com.swe2.model.Enum.Role;
+import com.swe2.model.dto.OAuth2UserRequest;
 import com.swe2.model.dto.RegisterResponse;
 import com.swe2.model.dto.TokenValidationResponse;
 import com.swe2.model.dto.UserCreateRequest;
@@ -33,8 +34,7 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private tokenValidation jwtValidation ;
-
+    private tokenValidation jwtValidation;
 
     @Transactional(readOnly = true)
     public Page<User> getAllUsers(int page, int size) {
@@ -47,6 +47,12 @@ public class UserService {
 
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+    }
+
+    @Transactional(readOnly = true)
+    public User getUserByOAuthProvider(String provider, String providerId) {
+        return userRepository.findByOauthProviderAndOauthProviderId(provider, providerId)
+                .orElse(null);
     }
 
     @Transactional(readOnly = true)
@@ -78,6 +84,44 @@ public class UserService {
     }
 
     @Transactional
+    public User createOrUpdateOAuthUser(OAuth2UserRequest request) {
+        // First, try to find by OAuth provider ID
+        Optional<User> existingUserOpt = userRepository.findByOauthProviderAndOauthProviderId(
+                request.getOauthProvider(),
+                request.getOauthProviderId());
+
+        if (existingUserOpt.isPresent()) {
+            // User exists with this OAuth provider, just return it
+            return existingUserOpt.get();
+        }
+
+        // Try to find by email (in case user registered traditionally)
+        existingUserOpt = userRepository.findByEmail(request.getEmail());
+
+        if (existingUserOpt.isPresent()) {
+            // User exists with traditional auth, link OAuth account
+            User user = existingUserOpt.get();
+            user.setOauthProvider(request.getOauthProvider());
+            user.setOauthProviderId(request.getOauthProviderId());
+            user.setEmailVerified(request.isEmailVerified());
+            return userRepository.save(user);
+        }
+
+        // Create new OAuth user
+        User newUser = new User();
+        newUser.setName(request.getName());
+        newUser.setEmail(request.getEmail());
+        newUser.setPassword(null); // OAuth users don't have passwords
+        newUser.setRole(request.getRole());
+        newUser.setOauthProvider(request.getOauthProvider());
+        newUser.setOauthProviderId(request.getOauthProviderId());
+        newUser.setEmailVerified(request.isEmailVerified());
+        newUser.setApproved(true); // Auto-approve OAuth users
+
+        return userRepository.save(newUser);
+    }
+
+    @Transactional
     public User banUser(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
@@ -98,8 +142,6 @@ public class UserService {
         return updatedUser;
     }
 
-
-
     public User approveUser(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
@@ -113,7 +155,8 @@ public class UserService {
     public List<String> changePassword(@Valid changePasswordDTO request, String token) {
         TokenValidationResponse validationResponse = jwtValidation.validateToken(token);
         if (!validationResponse.isValid()) {
-            return List.of("token: invalid token");}
+            return List.of("token: invalid token");
+        }
 
         User user = userRepository.findById(validationResponse.getUserId());
         if (user == null) {

@@ -1,5 +1,6 @@
 package com.swe2.controller;
 
+import com.swe2.model.dto.OAuth2UserRequest;
 import com.swe2.model.dto.RegisterResponse;
 import com.swe2.model.dto.UserCreateRequest;
 import com.swe2.model.Enum.Role;
@@ -40,7 +41,7 @@ public class UserController {
             @RequestParam(defaultValue = "10") int size) {
         if (size > 50) {
             size = 50;
-        }else if (size > 0) {
+        } else if (size > 0) {
             size = 0;
         }
 
@@ -73,6 +74,32 @@ public class UserController {
         }
     }
 
+    @GetMapping("/oauth")
+    public ResponseEntity<User> getUserByOAuthProvider(
+            @RequestParam("provider") String provider,
+            @RequestParam("providerId") String providerId) {
+        try {
+            User user = userService.getUserByOAuthProvider(provider, providerId);
+            if (user == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/oauth")
+    public ResponseEntity<User> createOrUpdateOAuthUser(@RequestBody OAuth2UserRequest request) {
+        try {
+            User user = userService.createOrUpdateOAuthUser(request);
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            logger.error("Error creating/updating OAuth user: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @GetMapping("/approve/{id}")
     public ResponseEntity<User> approveUser(@PathVariable Integer id) {
         try {
@@ -82,7 +109,6 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
     }
-
 
     @PostMapping("/")
     public ResponseEntity<?> createUser(@Valid @RequestBody UserCreateRequest request, BindingResult bindingResult) {
@@ -141,7 +167,6 @@ public class UserController {
         }
     }
 
-
     @PostMapping("/changePassword/")
     public Object changePassword(@Valid @RequestBody changePasswordDTO request,
             @RequestHeader("Authorization") String token,
@@ -150,8 +175,7 @@ public class UserController {
             if (bindingResult.hasErrors())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getFieldErrors());
 
-
-            List<String> errors = userService.changePassword(request,token);
+            List<String> errors = userService.changePassword(request, token);
 
             if (errors.isEmpty()) {
                 return ResponseEntity.ok().build();

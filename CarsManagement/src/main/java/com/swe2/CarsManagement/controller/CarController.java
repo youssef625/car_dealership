@@ -28,6 +28,44 @@ public class CarController {
         return ResponseEntity.ok(carService.getAllCars(page, size));
     }
 
+    /**
+     * Search cars by make, model, or year
+     * Protected against XSS attacks with input sanitization
+     * 
+     * Example: GET /api/cars/search?q=Toyota&page=0&size=10
+     * 
+     * @param query Search query (will be sanitized)
+     * @param page  Page number (default: 0)
+     * @param size  Page size (default: 10, max: 50)
+     * @return Page of matching cars
+     */
+    @GetMapping("/search")
+    public ResponseEntity<Page<Car>> searchCars(
+            @RequestParam("q") String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        // Validate query parameter
+        if (query == null || query.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        // Limit query length (DoS protection)
+        if (query.length() > 100) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(null);
+        }
+
+        // Limit page size (DoS protection)
+        if (size > 50) {
+            size = 50;
+        }
+
+        // Search with XSS protection (handled in service layer)
+        Page<Car> results = carService.searchCars(query, page, size);
+        return ResponseEntity.ok(results);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Car> getCarById(@PathVariable Long id) {
         return carService.getCarById(id)

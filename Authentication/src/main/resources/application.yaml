@@ -1,14 +1,40 @@
 server:
   port: 8080
+  tomcat:
+    # Connection timeout to prevent slowloris attacks
+    connection-timeout: 20s
+    # Thread pool limits to prevent thread exhaustion
+    threads:
+      max: 200
+      min-spare: 10
+    # Connection limits
+    max-connections: 10000
+    accept-count: 100
+    # Request size limits
+    max-swallow-size: 10MB
+    max-http-request-header-size: 8KB
 
 spring:
   application:
     name: AUTHENTICATION
+  # Request body size limits
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  # Async request timeout
+  mvc:
+    async:
+      request-timeout: 30000  # 30 seconds
 
 eureka:
   client:
     enabled: true
 
+google:
+  oauth:
+    client-id: 1047346089695-013esbnacj0ndp190f6ououfsg9ncfdk.apps.googleusercontent.com
+    client-secret: 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
 
 jwt:
   secret: 92a19c3b1821c881e7cc75cc58060cd7

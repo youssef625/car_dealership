@@ -17,4 +17,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     boolean existsByEmail(String email);
 
     List<User> findByRole(Role role);
+
+    // Find user by OAuth provider
+    Optional<User> findByOauthProviderAndOauthProviderId(String oauthProvider, String oauthProviderId);
 }
