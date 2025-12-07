@@ -18,7 +18,7 @@ spring:
   application:
     name: USERMANAGEMENT
   datasource:
-    url: jdbc:mysql://localhost:3306/iss-project
+    url: jdbc:mysql://localhost:3306/iss
     username: root
     password: 12345678
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -31,6 +31,14 @@ spring:
   mvc:
     async:
       request-timeout: 30000  # 30 seconds
+  # Async task execution for audit logging
+  task:
+    execution:
+      pool:
+        core-size: 2
+        max-size: 5
+        queue-capacity: 100
+      thread-name-prefix: audit-async-
 
   jpa:
     hibernate:

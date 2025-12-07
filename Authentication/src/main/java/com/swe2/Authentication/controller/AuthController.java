@@ -107,4 +107,16 @@ public class AuthController {
 
     }
 
+    /**
+     * Extract client IP address from request
+     * Handles X-Forwarded-For header for proxied requests
+     */
+    private String getClientIP(HttpServletRequest request) {
+        String xfHeader = request.getHeader("X-Forwarded-For");
+        if (xfHeader == null) {
+            return request.getRemoteAddr();
+        }
+        return xfHeader.split(",")[0]; // First IP in the chain
+    }
+
 }

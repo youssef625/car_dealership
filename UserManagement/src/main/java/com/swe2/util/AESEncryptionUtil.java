@@ -8,13 +8,13 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Base64;
 
 /**
  * AES-256-GCM encryption utility for encrypting sensitive data
  * Uses authenticated encryption with random IV for each encryption
+ * Lazy initialization allows application to start without encryption key set
  */
 @Component
 public class AESEncryptionUtil {
@@ -24,31 +24,42 @@ public class AESEncryptionUtil {
     private static final int GCM_IV_LENGTH = 12; // bytes
     private static final int AES_KEY_SIZE = 256; // bits
 
-    private final SecretKey secretKey;
+    @Value("${app.encryption.key:}")
+    private String encryptionKeyBase64;
 
-    public AESEncryptionUtil(@Value("${app.encryption.key:}") String base64Key) {
-        if (base64Key == null || base64Key.isEmpty()) {
-            throw new IllegalStateException(
-                    "Encryption key not configured. Set app.encryption.key or ENCRYPTION_KEY environment variable.");
-        }
+    private SecretKey secretKey;
 
-        try {
-            byte[] decodedKey = Base64.getDecoder().decode(base64Key);
-            if (decodedKey.length != 32) { // 256 bits = 32 bytes
-                throw new IllegalArgumentException(
-                        "Encryption key must be 32 bytes (256 bits). Use: openssl rand -base64 32");
+    /**
+     * Get or initialize the secret key
+     * Lazy initialization to allow application to start even if key is not
+     * configured
+     */
+    private SecretKey getSecretKey() {
+        if (secretKey == null) {
+            if (encryptionKeyBase64 == null || encryptionKeyBase64.trim().isEmpty()) {
+                throw new IllegalStateException(
+                        "Encryption key not configured. Please set ENCRYPTION_KEY environment variable. " +
+                                "Generate with: openssl rand -base64 32");
             }
-            this.secretKey = new SecretKeySpec(decodedKey, "AES");
-        } catch (IllegalArgumentException e) {
-            throw new IllegalStateException("Invalid encryption key format: " + e.getMessage(), e);
+
+            try {
+                byte[] decodedKey = Base64.getDecoder().decode(encryptionKeyBase64);
+                if (decodedKey.length != 32) { // 256 bits = 32 bytes
+                    throw new IllegalArgumentException(
+                            "Invalid encryption key length: " + decodedKey.length + " bytes. " +
+                                    "Expected 32 bytes (256 bits). Generate with: openssl rand -base64 32");
+                }
+                secretKey = new SecretKeySpec(decodedKey, "AES");
+            } catch (IllegalArgumentException e) {
+                throw new IllegalStateException("Invalid encryption key format: " + e.getMessage(), e);
+            }
         }
+        return secretKey;
     }
 
     /**
-     * Encrypt plaintext using AES-256-GCM
-     * 
-     * @param plaintext The text to encrypt
-     * @return Base64-encoded encrypted data (IV + ciphertext)
+     * Encrypt a string using AES-256-GCM
+     * Returns Base64 encoded: IV + Ciphertext
      */
     public String encrypt(String plaintext) {
         if (plaintext == null || plaintext.isEmpty()) {
@@ -64,29 +75,27 @@ public class AESEncryptionUtil {
             // Initialize cipher
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey, parameterSpec);
+            cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(), parameterSpec);
 
             // Encrypt
             byte[] ciphertext = cipher.doFinal(plaintext.getBytes("UTF-8"));
 
-            // Combine IV + ciphertext
-            ByteBuffer byteBuffer = ByteBuffer.allocate(iv.length + ciphertext.length);
-            byteBuffer.put(iv);
-            byteBuffer.put(ciphertext);
+            // Combine IV + Ciphertext
+            byte[] combined = new byte[iv.length + ciphertext.length];
+            System.arraycopy(iv, 0, combined, 0, iv.length);
+            System.arraycopy(ciphertext, 0, combined, iv.length, ciphertext.length);
 
-            // Encode to Base64
-            return Base64.getEncoder().encodeToString(byteBuffer.array());
+            // Return Base64 encoded
+            return Base64.getEncoder().encodeToString(combined);
 
         } catch (Exception e) {
-            throw new RuntimeException("Encryption failed: " + e.getMessage(), e);
+            throw new RuntimeException("Encryption failed", e);
         }
     }
 
     /**
-     * Decrypt Base64-encoded encrypted data using AES-256-GCM
-     * 
-     * @param encryptedBase64 Base64-encoded encrypted data (IV + ciphertext)
-     * @return Decrypted plaintext
+     * Decrypt a Base64 encoded string (IV + Ciphertext)
+     * Returns the original plaintext
      */
     public String decrypt(String encryptedBase64) {
         if (encryptedBase64 == null || encryptedBase64.isEmpty()) {
@@ -94,20 +103,19 @@ public class AESEncryptionUtil {
         }
 
         try {
-            // Decode from Base64
-            byte[] decoded = Base64.getDecoder().decode(encryptedBase64);
+            // Decode Base64
+            byte[] combined = Base64.getDecoder().decode(encryptedBase64);
 
             // Extract IV and ciphertext
-            ByteBuffer byteBuffer = ByteBuffer.wrap(decoded);
             byte[] iv = new byte[GCM_IV_LENGTH];
-            byteBuffer.get(iv);
-            byte[] ciphertext = new byte[byteBuffer.remaining()];
-            byteBuffer.get(ciphertext);
+            byte[] ciphertext = new byte[combined.length - GCM_IV_LENGTH];
+            System.arraycopy(combined, 0, iv, 0, iv.length);
+            System.arraycopy(combined, iv.length, ciphertext, 0, ciphertext.length);
 
             // Initialize cipher
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, parameterSpec);
+            cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), parameterSpec);
 
             // Decrypt
             byte[] plaintext = cipher.doFinal(ciphertext);
@@ -115,7 +123,7 @@ public class AESEncryptionUtil {
             return new String(plaintext, "UTF-8");
 
         } catch (Exception e) {
-            throw new RuntimeException("Decryption failed: " + e.getMessage(), e);
+            throw new RuntimeException("Decryption failed", e);
         }
     }
 
