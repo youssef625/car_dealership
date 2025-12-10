@@ -1,27 +1,76 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./product-page.css";
 import NAVBAR from "../componantes/NAVBAR";
 
 const PRODUCT_PAGE = () => {
-  const car = {
-    id: 1,
-    make: "Tesla",
-    model: "Model 3",
-    year: 2022,
-    price: 48000,
-    description:
-      "A premium electric sedan offering long range, fast acceleration, and advanced driver assistance technology.",
-    status: "AVAILABLE",
-    images: [
-      "https://tesla-cdn.thron.com/delivery/public/image/tesla/4a5710e9-41d8-4bbe-a20e-b5a03ef64a68/bvlatuR/std/4096x2560/Model-3-Main-Hero-Desktop-LHD",
-      "https://tesla-cdn.thron.com/delivery/public/image/tesla/812b8890-b006-4a66-a907-6fba88028a42/bvlatuR/std/2880x1800/Model-3-Interior-Hero-Desktop",
-      "https://tesla-cdn.thron.com/delivery/public/image/tesla/94a123da-2338-4e7e-be40-20ec594c45e0/bvlatuR/std/2880x1800/Model-3-Range-Hero-Desktop",
-    ],
+  const { id } = useParams();
+
+  const [car, setCar] = useState(null);
+  const [mainImage, setMainImage] = useState("");
+  const [offerPrice, setOfferPrice] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    const fetchCar = async () => {
+      try {
+        const res = await fetch(`http://localhost:8080/api/cars/${id}`);
+        const data = await res.json();
+
+        setCar(data);
+        setMainImage(data.images[0]);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching car:", err);
+        setLoading(false);
+      }
+    };
+
+    fetchCar();
+  }, [id]);
+
+
+  const submitOffer = async () => {
+    if (!offerPrice || offerPrice <= 0) {
+      alert("Please enter a valid offer price.");
+      return;
+    }
+
+    setSending(true);
+
+    const offerData = {
+      carId: Number(id),
+      userId: 1,          
+      price: Number(offerPrice),
+      employeeId: 0       
+    };
+
+    try {
+      const res = await fetch("http://localhost:8080/api/offers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(offerData)
+      });
+
+      if (!res.ok) throw new Error("Failed to send offer");
+
+      alert("Offer submitted successfully!");
+
+      setOfferPrice("");
+    } catch (err) {
+      console.error("Error submitting offer:", err);
+      alert("Failed to submit offer. Try again.");
+    }
+
+    setSending(false);
   };
 
-  const [mainImage, setMainImage] = useState(car.images[0]);
-  const [offerPrice, setOfferPrice] = useState("");
+  if (loading) return <h2 className="text-center mt-5">Loading...</h2>;
+  if (!car) return <h2 className="text-center mt-5">Car Not Found</h2>;
 
   return (
     <>
@@ -44,9 +93,7 @@ const PRODUCT_PAGE = () => {
                   key={index}
                   src={img}
                   alt={`Thumbnail ${index}`}
-                  className={`thumbnail rounded ${
-                    mainImage === img ? "active" : ""
-                  }`}
+                  className={`thumbnail rounded ${mainImage === img ? "active" : ""}`}
                   onClick={() => setMainImage(img)}
                 />
               ))}
@@ -76,8 +123,6 @@ const PRODUCT_PAGE = () => {
               <span className="h4 me-2">${car.price.toLocaleString()}</span>
             </div>
 
-            {/* Removed Reviews/Stars */}
-
             <p className="mb-4">{car.description}</p>
 
             {/* Offer Input */}
@@ -93,8 +138,13 @@ const PRODUCT_PAGE = () => {
             </div>
 
             {/* Submit Offer Button */}
-            <button className="btn btn-primary btn-lg w-100">
-              <i className="bi bi-cart-plus"></i> Submit Offer
+            <button
+              className="btn btn-primary btn-lg w-100"
+              onClick={submitOffer}
+              disabled={sending}
+            >
+              <i className="bi bi-cart-plus"></i>{" "}
+              {sending ? "Submitting..." : "Submit Offer"}
             </button>
 
             {/* Features */}
