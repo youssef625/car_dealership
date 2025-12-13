@@ -11,20 +11,41 @@ spring:
       discovery:
         locator:
           enabled: true
-          lower-case-service-id: true
       routes:
+        # Public authentication routes (no filter)
         - id: authentication-service
           uri: lb://AUTHENTICATION
           predicates:
             - Path=/api/auth/**
-        - id: user-management-service
+        
+        # Ban/Unban operations - superAdmin only
+        - id: user-ban-operations
           uri: lb://USERMANAGEMENT
           predicates:
             - Path=/api/users/**
+          filters:
+            - name: RoleAuthorizationFilter
+
+
+        # Car management - requires authentication (any authenticated user)
         - id: carMnangement-service
-          uri: lb://CARMANAGEMENT
+          uri: lb://CARSMANAGEMENT
           predicates:
             - Path=/api/cars/**
+          filters:
+            - RoleAuthorizationFilter
+
+        # Offers - General (Authenticated users)
+        - id: offers-general
+          uri: lb://OFFERSMANAGEMENT
+          predicates:
+            - Path=/api/offers/**
+          filters:
+            - RoleAuthorizationFilter
+
+
+
+
 
 eureka:
   client:
