@@ -7,7 +7,7 @@ import {
 } from "react-icons/fa";
 import { Link, Outlet } from "react-router-dom";
 
-const ADMIN_NAV = () => {
+const EmpLayout = () => {
   return (
     <div className="d-flex w-100">
       {/* SIDEBAR */}
@@ -25,25 +25,10 @@ const ADMIN_NAV = () => {
         }}
       >
         <ul className="nav flex-column px-3">
+
           <li className="nav-item mb-2">
             <Link
-              to="/admin/assignEmp"
-              className="nav-link d-flex align-items-center gap-2"
-            >
-              <FaUserPlus /> Assign Employees
-            </Link>
-          </li>
-          <li className="nav-item mb-2">
-            <Link
-              to="/admin/users"
-              className="nav-link d-flex align-items-center gap-2"
-            >
-              <FaUserPlus /> Users
-            </Link>
-          </li>
-          <li className="nav-item mb-2">
-            <Link
-              to="/admin/editCar"
+              to="/emp/editCar"
               className="nav-link d-flex align-items-center gap-2"
             >
               <FaEdit /> Edit car
@@ -52,7 +37,7 @@ const ADMIN_NAV = () => {
 
           <li className="nav-item mb-2">
             <Link
-              to="/admin/deleteCar"
+              to="/emp/deleteCar"
               className="nav-link d-flex align-items-center gap-2"
             >
               <FaTrash /> Delete car
@@ -61,7 +46,7 @@ const ADMIN_NAV = () => {
 
           <li className="nav-item mb-2">
             <Link
-              to="/admin/offers"
+              to="/emp/offers"
               className="nav-link d-flex align-items-center gap-2"
             >
               <FaTags /> Offers
@@ -116,26 +101,11 @@ const ADMIN_NAV = () => {
 
         <div className="offcanvas-body">
           <ul className="nav flex-column">
-            <li className="nav-item mb-2">
-              <Link
-                to="/admin/assignEmp"
-                className="nav-link d-flex align-items-center gap-2"
-              >
-                <FaUserPlus /> Assign Employees
-              </Link>
-            </li>
-            <li className="nav-item mb-2">
-              <Link
-                to="/admin/users"
-                className="nav-link d-flex align-items-center gap-2"
-              >
-                <FaUserPlus /> Users
-              </Link>
-            </li>
+            
 
             <li className="nav-item mb-2">
               <Link
-                to="/admin/editCar"
+                to="/emp/editCar"
                 className="nav-link d-flex align-items-center gap-2"
               >
                 <FaEdit /> Edit car
@@ -144,7 +114,7 @@ const ADMIN_NAV = () => {
 
             <li className="nav-item mb-2">
               <Link
-                to="/admin/deleteCar"
+                to="/emp/deleteCar"
                 className="nav-link d-flex align-items-center gap-2"
               >
                 <FaTrash /> Delete car
@@ -153,7 +123,7 @@ const ADMIN_NAV = () => {
 
             <li className="nav-item mb-2">
               <Link
-                to="/admin/offers"
+                to="/emp/offers"
                 className="nav-link d-flex align-items-center gap-2"
               >
                 <FaTags /> Offers
@@ -166,4 +136,4 @@ const ADMIN_NAV = () => {
   );
 };
 
-export default ADMIN_NAV;
+export default EmpLayout;
