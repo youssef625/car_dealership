@@ -40,8 +40,8 @@ public class UserController {
             @RequestParam(defaultValue = "10") int size) {
         if (size > 50) {
             size = 50;
-        } else if (size > 0) {
-            size = 0;
+        } else if (size <= 0) {
+            size = 10;
         }
 
         if (page < 0) {
@@ -50,6 +50,16 @@ public class UserController {
         Page<User> users = userService.getAllUsers(page, size);
         Page<UserDTO> userDTOs = users.map(user -> new UserDTO(
                 user));
+        return ResponseEntity.ok(userDTOs);
+    }
+
+    @GetMapping("/unapproved-employees")
+    @com.swe2.aspect.RequiresRole("superAdmin")
+    public ResponseEntity<List<UserDTO>> getUnapprovedEmployees() {
+        List<User> users = userService.getUnapprovedEmployees();
+        List<UserDTO> userDTOs = users.stream()
+                .map(UserDTO::new)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(userDTOs);
     }
 

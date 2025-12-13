@@ -16,6 +16,9 @@ COPY CarsManagement/pom.xml CarsManagement/pom.xml
 COPY FrontEnd/pom.xml FrontEnd/pom.xml
 COPY OffersManagement/pom.xml OffersManagement/pom.xml
 
+# Download dependencies (this layer will be cached unless pom.xml changes)
+RUN mvn dependency:go-offline -pl UserManagement -am
+
 # Copy only UserManagement source code
 COPY UserManagement/src UserManagement/src
 
