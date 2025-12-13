@@ -7,12 +7,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-
 @FeignClient(name = "AUTHENTICATION")
 public interface tokenValidation {
 
     @GetMapping("/api/auth/validate")
-    TokenValidationResponse validateToken(@RequestHeader("Authorization") String token);
-
+    TokenValidationResponse validateToken(@RequestHeader("Authorization") String authHeader);
 
 }

@@ -20,9 +20,13 @@ public class CarService {
     @Autowired
     private CarRepository carRepository;
 
-    public Page<Car> getAllCars(int page, int size) {
+    public Page<Car> getAllCars(int page, int size, String role) {
         Pageable pageable = PageRequest.of(page, size);
-        return carRepository.findAll(pageable);
+        if ("superAdmin".equalsIgnoreCase(role)) {
+            return carRepository.findAll(pageable);
+        } else {
+            return carRepository.findByStatus(CarStatus.AVAILABLE, pageable);
+        }
     }
 
     public Optional<Car> getCarById(Long id) {

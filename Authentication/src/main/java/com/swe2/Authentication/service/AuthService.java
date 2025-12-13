@@ -22,38 +22,45 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
     public LoginResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail());
+        try {
+            User user = userRepository.findByEmail(request.getEmail());
 
-        if (user == null) {
-            throw new RuntimeException("Invalid email or password");
-        }
+            if (user == null) {
+                throw new RuntimeException("Invalid email or password");
+            }
 
-        // check if user is banned
-        if (user.isBanned()) {
-           return new LoginResponse(List.of("email: user is banned"));
-        }
+            // check if user is banned
+            if (user.isBanned()) {
+                return new LoginResponse(List.of("email: user is banned"));
+            }
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+                return new LoginResponse(List.of("email: invalid email or password"));
+            }
+            if (user.getRole() == Role.employee  && !user.isVerified() ) {
+                return new LoginResponse(List.of("email: user is not verified"));
+            }
+            String token = jwtService.generateToken(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getName(),
+                    user.getRole()
+            );
+
+            return new LoginResponse(
+                    token,
+                    user.getId(),
+                    user.getEmail(),
+                    user.getName(),
+                    user.getRole()
+            );
+
+
+        }catch (Exception e) {
             return new LoginResponse(List.of("email: invalid email or password"));
         }
-        if (user.getRole() == Role.employee  && !user.isVerified() ) {
-            return new LoginResponse(List.of("email: user is not verified"));
-        }
 
-        String token = jwtService.generateToken(
-                user.getId(),
-                user.getEmail(),
-                user.getName(),
-                user.getRole()
-        );
 
-        return new LoginResponse(
-                token,
-                user.getId(),
-                user.getEmail(),
-                user.getName(),
-                user.getRole()
-        );
     }
 
     public RegisterResponse register(RegisterRequest request){

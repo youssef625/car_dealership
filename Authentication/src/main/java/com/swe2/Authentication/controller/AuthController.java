@@ -9,19 +9,16 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*") // Configure properly in production
 public class AuthController {
 
     @Autowired
     private AuthService authService;
 
-
-
     @PostMapping("/login")
     public Object login(@RequestBody LoginRequest request) {
         try {
             LoginResponse response = authService.login(request);
-            if(response.hasErrors()){
+            if (response.hasErrors()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response.getErrors());
             }
             return ResponseEntity.ok(response);
@@ -29,7 +26,6 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
-
 
     @GetMapping("/validate")
     public ResponseEntity<TokenValidationResponse> validateToken(
@@ -48,11 +44,13 @@ public class AuthController {
                     .body(new TokenValidationResponse(false, "Invalid authorization header"));
         }
     }
+
     @PostMapping("/register")
-    public Object register(@RequestBody RegisterRequest request){
+    public Object register(@RequestBody RegisterRequest request) {
         try {
             RegisterResponse response = authService.register(request);
-            if(!response.hasErrors()) return ResponseEntity.ok(response);
+            if (!response.hasErrors())
+                return ResponseEntity.ok(response);
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response.getErrors());
         } catch (RuntimeException e) {
@@ -62,10 +60,11 @@ public class AuthController {
     }
 
     @PostMapping("/admin/register")
-    public Object registerAdmin(@RequestBody RegisterRequest request){
+    public Object registerAdmin(@RequestBody RegisterRequest request) {
         try {
             RegisterResponse response = authService.registerAdmin(request);
-            if(!response.hasErrors()) return ResponseEntity.ok(response);
+            if (!response.hasErrors())
+                return ResponseEntity.ok(response);
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response.getErrors());
         } catch (RuntimeException e) {
@@ -74,4 +73,4 @@ public class AuthController {
 
     }
 
-   }
+}

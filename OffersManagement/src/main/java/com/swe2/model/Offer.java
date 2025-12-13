@@ -22,7 +22,12 @@ public class Offer {
     @Column(nullable = true)
     private int employeeId;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private OfferStatus status;
+
     public Offer() {
+        this.status = OfferStatus.PENDING;
     }
 
     public Offer(int carId, int userId, int price, int employeeId) {
@@ -30,6 +35,7 @@ public class Offer {
         this.userId = userId;
         this.price = price;
         this.employeeId = employeeId;
+        this.status = OfferStatus.PENDING;
     }
 
     public int getOfferId() {
@@ -70,5 +76,13 @@ public class Offer {
 
     public void setEmployeeId(int employeeId) {
         this.employeeId = employeeId;
+    }
+
+    public OfferStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OfferStatus status) {
+        this.status = status;
     }
 }

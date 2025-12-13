@@ -22,31 +22,21 @@ spring:
         - id: user-ban-operations
           uri: lb://USERMANAGEMENT
           predicates:
-            - Path=/api/users/ban/**, /api/users/unban/**
-          filters:
-            - name: RoleAuthorizationFilter
-              args:
-                requiredRoles: superAdmin
-        
-        # General user management - superAdmin and employee
-        - id: user-management-service
-          uri: lb://USERMANAGEMENT
-          predicates:
             - Path=/api/users/**
           filters:
             - name: RoleAuthorizationFilter
-              args:
-                requiredRoles: superAdmin,employee
-        
+
+
         # Car management - requires authentication (any authenticated user)
         - id: carMnangement-service
-          uri: lb://CARMANAGEMENT
+          uri: lb://CARSMANAGEMENT
           predicates:
             - Path=/api/cars/**
           filters:
             - RoleAuthorizationFilter
 
-        - id: offers-service
+        # Offers - General (Authenticated users)
+        - id: offers-general
           uri: lb://OFFERSMANAGEMENT
           predicates:
             - Path=/api/offers/**

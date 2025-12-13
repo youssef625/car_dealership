@@ -1,5 +1,4 @@
-package com.swe2.DTO;
-
+package com.swe2.CarsManagement.dto;
 
 public class TokenValidationResponse {
     private boolean valid;
@@ -47,6 +46,4 @@ public class TokenValidationResponse {
     public void setRole(String role) {
         this.role = role;
     }
-
-
 }

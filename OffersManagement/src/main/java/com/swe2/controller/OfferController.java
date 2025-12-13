@@ -3,7 +3,6 @@ package com.swe2.controller;
 import com.swe2.DTO.carOfferForUser;
 import com.swe2.DTO.createOfferRequest;
 import com.swe2.DTO.offerbycar;
-import com.swe2.model.Offer;
 import com.swe2.service.OfferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,22 +12,16 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/offers")
-@CrossOrigin(origins = "*")
 public class OfferController {
 
     @Autowired
-    private  OfferService offerService;
-
-
-    @GetMapping
-    public List<offerbycar> getAllOffers() {
-        return List.of();
-    }
+    private OfferService offerService;
 
     @PostMapping
-    public Object createOffer(@RequestBody createOfferRequest offer , @RequestHeader("Authorization") String token) {
+    @com.swe2.aspect.RequiresRole("user")
+    public Object createOffer(@RequestBody createOfferRequest offer, @RequestHeader("Authorization") String token) {
 
-        List<String> errors = offerService.createOffer(offer , token);
+        List<String> errors = offerService.createOffer(offer, token);
 
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(errors);
@@ -38,12 +31,50 @@ public class OfferController {
 
     @GetMapping("/{id}")
     public Object getOfferById(@PathVariable Integer id) {
+
+        carOfferForUser offer = offerService.getOfferById(id);
+        if (offer == null) {
+            return ResponseEntity.badRequest().body("Offer not found.");
+        }
         return offerService.getOfferById(id);
     }
 
+    @GetMapping("/admin/approve/{id}")
+    @com.swe2.aspect.RequiresRole({ "superAdmin", "employee" })
+    public Object approveOffer(@PathVariable Integer id) {
+        List<String> errors = offerService.approveOffer(id);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.badRequest().body(errors);
+        }
+        return ResponseEntity.ok().build();
+    }
 
+    @GetMapping("/admin/cancel/{id}")
+    @com.swe2.aspect.RequiresRole("superAdmin")
+    public Object cancelOffer(@PathVariable Integer id) {
+        List<String> errors = offerService.cancelOffer(id);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.badRequest().body(errors);
+        }
+        return ResponseEntity.ok().build();
+    }
 
+    @GetMapping("/admin/confirm/{id}")
+    @com.swe2.aspect.RequiresRole("superAdmin")
+    public Object confirmOffer(@PathVariable Integer id) {
+        List<String> errors = offerService.confirmOffer(id);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.badRequest().body(errors);
+        }
+        return ResponseEntity.ok().build();
+    }
 
-
-
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
+        if (ex.getMessage().contains("User does not have permission") || ex.getMessage().contains("Invalid token")
+                || ex.getMessage().contains("Missing or invalid Authorization header")) {
+            return ResponseEntity.status(403).body(ex.getMessage());
+        }
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
 }

@@ -10,9 +10,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OfferRepository extends JpaRepository<Offer, Long> {
     // Just test if the query logic is valid
-    @Query(value = "SELECT MAX(price) AS price, COUNT(*) AS count " +
-            "FROM offers " +  // This is your actual TABLE name
+    @Query(value = "SELECT COALESCE(MAX(price), 0) AS price, COUNT(*) AS count " +
+            "FROM offers " + // This is your actual TABLE name
             "WHERE car_id = :carId", // This is your actual COLUMN name
             nativeQuery = true)
     carOfferForUser findMaxPriceAndCountByCarId(@Param("carId") int carId);
+
+    Offer findTopByCarIdOrderByPriceDesc(int carId);
 }

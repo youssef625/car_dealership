@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
 public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -35,12 +34,13 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
+    @com.swe2.aspect.RequiresRole({ "superAdmin", "employee" })
     public ResponseEntity<Page<UserDTO>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         if (size > 50) {
             size = 50;
-        }else if (size > 0) {
+        } else if (size > 0) {
             size = 0;
         }
 
@@ -74,6 +74,7 @@ public class UserController {
     }
 
     @GetMapping("/approve/{id}")
+    @com.swe2.aspect.RequiresRole("superAdmin")
     public ResponseEntity<User> approveUser(@PathVariable Integer id) {
         try {
             User user = userService.approveUser(id);
@@ -82,7 +83,6 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
     }
-
 
     @PostMapping("/")
     public ResponseEntity<?> createUser(@Valid @RequestBody UserCreateRequest request, BindingResult bindingResult) {
@@ -119,7 +119,17 @@ public class UserController {
         return ResponseEntity.badRequest().body(errors);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
+        if (ex.getMessage().contains("User does not have permission") || ex.getMessage().contains("Invalid token")
+                || ex.getMessage().contains("Missing or invalid Authorization header")) {
+            return ResponseEntity.status(403).body(ex.getMessage());
+        }
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
     @GetMapping("/ban/{id}")
+    @com.swe2.aspect.RequiresRole("superAdmin")
     public ResponseEntity<User> ban(
             @PathVariable Integer id) {
         try {
@@ -131,6 +141,7 @@ public class UserController {
     }
 
     @GetMapping("/unban/{id}")
+    @com.swe2.aspect.RequiresRole("superAdmin")
     public ResponseEntity<User> unBan(
             @PathVariable Integer id) {
         try {
@@ -141,7 +152,6 @@ public class UserController {
         }
     }
 
-
     @PostMapping("/changePassword/")
     public Object changePassword(@Valid @RequestBody changePasswordDTO request,
             @RequestHeader("Authorization") String token,
@@ -150,8 +160,7 @@ public class UserController {
             if (bindingResult.hasErrors())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getFieldErrors());
 
-
-            List<String> errors = userService.changePassword(request,token);
+            List<String> errors = userService.changePassword(request, token);
 
             if (errors.isEmpty()) {
                 return ResponseEntity.ok().build();

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "USERMANAGEMENT")
 public interface UserRepository {
 
-    @GetMapping("/api/users/authdata/{email}")
+    @GetMapping("/api/users/authdata/{email:.+}")
     User findByEmail(@PathVariable("email") String email);
 
     @GetMapping("/api/users/{id}")
