@@ -1,0 +1,114 @@
+services:
+  eureka-server:
+    build:
+      context: .
+      dockerfile: EurikaServer/Dockerfile
+    ports:
+      - "8761:8761"
+    environment:
+      - JAVA_OPTS=-Xmx256m -Xms256m
+    networks:
+      - dealership-network
+    restart: on-failure
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - JAVA_OPTS=-Xmx256m -Xms256m -Deureka.client.service-url.defaultZone=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - dealership-network
+    restart: on-failure
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=12345678
+      - MYSQL_DATABASE=dealership
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - dealership-network
+    restart: always
+
+  user-management:
+    build:
+      context: .
+      dockerfile: UserManagement/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dealership?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=12345678
+      - JAVA_OPTS=-Xmx256m -Xms256m -Deureka.client.service-url.defaultZone=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - mysql
+    networks:
+      - dealership-network
+    restart: on-failure
+
+  cars-management:
+    build:
+      context: .
+      dockerfile: CarsManagement/Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dealership?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=12345678
+      - JAVA_OPTS=-Xmx256m -Xms256m -Deureka.client.service-url.defaultZone=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - mysql
+    networks:
+      - dealership-network
+    restart: on-failure
+
+  offers-management:
+    build:
+      context: .
+      dockerfile: OffersManagement/Dockerfile
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dealership?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=12345678
+      - JAVA_OPTS=-Xmx256m -Xms256m -Deureka.client.service-url.defaultZone=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - mysql
+    networks:
+      - dealership-network
+    restart: on-failure
+
+  authentication:
+    build:
+      context: .
+      dockerfile: Authentication/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - JAVA_OPTS=-Xmx256m -Xms256m -Deureka.client.service-url.defaultZone=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - dealership-network
+    restart: on-failure
+
+networks:
+  dealership-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
