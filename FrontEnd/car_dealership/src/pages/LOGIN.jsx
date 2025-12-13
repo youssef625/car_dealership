@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import NAVBAR from "../componantes/NAVBAR";
 
 const LOGIN = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -12,11 +14,14 @@ const LOGIN = () => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await fetch(
+        "https://c0d4289b83ae.ngrok-free.app/api/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       if (!res.ok) {
         throw new Error("Invalid login credentials");
@@ -24,16 +29,20 @@ const LOGIN = () => {
 
       const data = await res.json();
 
-    
+      // Save user data and token
       localStorage.setItem("token", data.token);
       localStorage.setItem("userId", data.userId);
       localStorage.setItem("role", data.role);
       localStorage.setItem("name", data.name);
       localStorage.setItem("email", data.email);
 
-      
-      window.location.href = "/";
-    } catch  {
+      // Redirect based on role
+      if (data.role === "admin" || data.role === "employee") {
+        navigate("/admin"); // Admin dashboard
+      } else {
+        navigate("/"); // Normal user homepage
+      }
+    } catch {
       setError("Incorrect Email or Password");
     }
   };
@@ -76,9 +85,7 @@ const LOGIN = () => {
               Sign in to your account
             </h1>
 
-            {error && (
-              <p className="text-danger text-center mb-3">{error}</p>
-            )}
+            {error && <p className="text-danger text-center mb-3">{error}</p>}
 
             <div className="form-floating mb-3">
               <input
@@ -117,7 +124,10 @@ const LOGIN = () => {
               </label>
             </div>
 
-            <button className="btn btn-primary w-100 py-2 rounded-3" type="submit">
+            <button
+              className="btn btn-primary w-100 py-2 rounded-3"
+              type="submit"
+            >
               Sign in
             </button>
 
