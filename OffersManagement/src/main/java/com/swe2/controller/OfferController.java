@@ -41,28 +41,28 @@ public class OfferController {
 
     @GetMapping("/admin/approve/{id}")
     @com.swe2.aspect.RequiresRole({ "superAdmin", "employee" })
-    public Object approveOffer(@PathVariable Integer id) {
-        List<String> errors = offerService.approveOffer(id);
+    public Object approveOffer(@PathVariable Integer id, @RequestHeader("Authorization") String token) {
+        List<String> errors = offerService.approveOffer(id, token);
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(errors);
         }
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/admin/cancel/{id}")
+    @GetMapping("/admin/cancel/{carId}")
     @com.swe2.aspect.RequiresRole("superAdmin")
-    public Object cancelOffer(@PathVariable Integer id) {
-        List<String> errors = offerService.cancelOffer(id);
+    public Object cancelOffer(@PathVariable Integer carId, @RequestHeader("Authorization") String token) {
+        List<String> errors = offerService.cancelOffer(carId, token);
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(errors);
         }
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/admin/confirm/{id}")
+    @GetMapping("/admin/confirm/{carId}")
     @com.swe2.aspect.RequiresRole("superAdmin")
-    public Object confirmOffer(@PathVariable Integer id) {
-        List<String> errors = offerService.confirmOffer(id);
+    public Object confirmOffer(@PathVariable Integer carId, @RequestHeader("Authorization") String token) {
+        List<String> errors = offerService.confirmOffer(carId, token);
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(errors);
         }

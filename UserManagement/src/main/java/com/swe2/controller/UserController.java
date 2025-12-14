@@ -140,11 +140,11 @@ public class UserController {
 
     @GetMapping("/ban/{id}")
     @com.swe2.aspect.RequiresRole("superAdmin")
-    public ResponseEntity<User> ban(
+    public ResponseEntity<UserDTO> ban(
             @PathVariable Integer id) {
         try {
             User user = userService.banUser(id);
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(new UserDTO(user));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -152,11 +152,11 @@ public class UserController {
 
     @GetMapping("/unban/{id}")
     @com.swe2.aspect.RequiresRole("superAdmin")
-    public ResponseEntity<User> unBan(
+    public ResponseEntity<UserDTO> unBan(
             @PathVariable Integer id) {
         try {
             User user = userService.unBanUser(id);
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(new UserDTO(user));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }

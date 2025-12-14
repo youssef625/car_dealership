@@ -55,7 +55,7 @@ public class OfferService {
         return offerRepository.findMaxPriceAndCountByCarId(id);
     }
 
-    public List<String> approveOffer(int carId) {
+    public List<String> approveOffer(int carId, String token) {
         Offer offer = offerRepository.findTopByCarIdAndStatusNotOrderByPriceDesc(carId,
                 com.swe2.model.OfferStatus.CANCELLED);
         if (offer == null) {
@@ -64,39 +64,39 @@ public class OfferService {
         offer.setStatus(com.swe2.model.OfferStatus.APPROVED);
         offerRepository.save(offer);
         try {
-            carClient.updateCarStatus((long) carId, "RESERVED");
+            carClient.updateCarStatus((long) carId, "RESERVED", token);
         } catch (Exception e) {
             return List.of("Failed to update car status: " + e.getMessage());
         }
         return List.of();
     }
 
-    public List<String> cancelOffer(int offerId) {
-        java.util.Optional<Offer> offerOptional = offerRepository.findById((long) offerId);
-        if (offerOptional.isEmpty()) {
-            return List.of("Offer not found.");
+    public List<String> cancelOffer(int carId, String token) {
+        Offer offer = offerRepository.findTopByCarIdAndStatusNotOrderByPriceDesc(carId,
+                com.swe2.model.OfferStatus.CANCELLED);
+        if (offer == null) {
+            return List.of("No active offer found for this car.");
         }
-        Offer offer = offerOptional.get();
         offer.setStatus(com.swe2.model.OfferStatus.CANCELLED);
         offerRepository.save(offer);
         try {
-            carClient.updateCarStatus((long) offer.getCarId(), "AVAILABLE");
+            carClient.updateCarStatus((long) offer.getCarId(), "AVAILABLE", token);
         } catch (Exception e) {
             return List.of("Failed to update car status: " + e.getMessage());
         }
         return List.of();
     }
 
-    public List<String> confirmOffer(int offerId) {
-        java.util.Optional<Offer> offerOptional = offerRepository.findById((long) offerId);
-        if (offerOptional.isEmpty()) {
-            return List.of("Offer not found.");
+    public List<String> confirmOffer(int carId, String token) {
+        Offer offer = offerRepository.findTopByCarIdAndStatusNotOrderByPriceDesc(carId,
+                com.swe2.model.OfferStatus.CANCELLED);
+        if (offer == null) {
+            return List.of("No active offer found for this car.");
         }
-        Offer offer = offerOptional.get();
         offer.setStatus(com.swe2.model.OfferStatus.CONFIRMED);
         offerRepository.save(offer);
         try {
-            carClient.updateCarStatus((long) offer.getCarId(), "SOLD");
+            carClient.updateCarStatus((long) offer.getCarId(), "SOLD", token);
         } catch (Exception e) {
             return List.of("Failed to update car status: " + e.getMessage());
         }
