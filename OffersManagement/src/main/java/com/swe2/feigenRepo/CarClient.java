@@ -9,4 +9,7 @@ public interface CarClient {
 
     @PutMapping("/api/cars/{id}/status/{status}")
     void updateCarStatus(@PathVariable("id") Long id, @PathVariable("status") String status);
+
+    @org.springframework.web.bind.annotation.GetMapping("/api/cars/{id}")
+    com.swe2.DTO.CarDTO getCarById(@PathVariable("id") Long id);
 }

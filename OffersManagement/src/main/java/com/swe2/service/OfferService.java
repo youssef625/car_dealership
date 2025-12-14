@@ -25,10 +25,20 @@ public class OfferService {
 
     public List<String> createOffer(createOfferRequest offer, String token) {
         TokenValidationResponse validationResponse = tokenvalidation.validateToken(token);
-        Offer offers = offerRepository.findTopByCarIdOrderByPriceDesc(offer.getCarId());
+        Offer offers = offerRepository.findTopByCarIdAndStatusNotOrderByPriceDesc(offer.getCarId(),
+                com.swe2.model.OfferStatus.CANCELLED);
 
         if (offers != null && offer.getPrice() <= offers.getPrice()) {
             return List.of("Offer price must be higher than the current highest offer.");
+        }
+
+        try {
+            com.swe2.DTO.CarDTO car = carClient.getCarById((long) offer.getCarId());
+            if (car != null && offer.getPrice() <= car.getPrice()) {
+                return List.of("Offer price must be higher than the car's original price.");
+            }
+        } catch (Exception e) {
+            return List.of("Failed to validate car price: " + e.getMessage());
         }
         // Token validation and role check handled by Aspect
 
@@ -46,7 +56,8 @@ public class OfferService {
     }
 
     public List<String> approveOffer(int carId) {
-        Offer offer = offerRepository.findTopByCarIdOrderByPriceDesc(carId);
+        Offer offer = offerRepository.findTopByCarIdAndStatusNotOrderByPriceDesc(carId,
+                com.swe2.model.OfferStatus.CANCELLED);
         if (offer == null) {
             return List.of("No offers found for this car.");
         }

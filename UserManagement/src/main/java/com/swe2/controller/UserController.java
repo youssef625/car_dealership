@@ -85,10 +85,10 @@ public class UserController {
 
     @GetMapping("/approve/{id}")
     @com.swe2.aspect.RequiresRole("superAdmin")
-    public ResponseEntity<User> approveUser(@PathVariable Integer id) {
+    public ResponseEntity<UserDTO> approveUser(@PathVariable Integer id) {
         try {
             User user = userService.approveUser(id);
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(new UserDTO(user));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }

@@ -18,7 +18,7 @@ public class OfferController {
     private OfferService offerService;
 
     @PostMapping
-    @com.swe2.aspect.RequiresRole("user")
+    @com.swe2.aspect.RequiresRole({ "user", "employee" })
     public Object createOffer(@RequestBody createOfferRequest offer, @RequestHeader("Authorization") String token) {
 
         List<String> errors = offerService.createOffer(offer, token);

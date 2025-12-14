@@ -64,4 +64,8 @@ public class User {
     public boolean isVerified() {
         return approved;
     }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
+    }
 }
