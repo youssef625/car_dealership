@@ -33,8 +33,7 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private tokenValidation jwtValidation ;
-
+    private tokenValidation jwtValidation;
 
     @Transactional(readOnly = true)
     public Page<User> getAllUsers(int page, int size) {
@@ -52,6 +51,11 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<User> getUsersByRole(Role role) {
         return userRepository.findByRole(role);
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> getUnapprovedEmployees() {
+        return userRepository.findByRoleAndApproved(Role.employee, false);
     }
 
     @Transactional
@@ -98,8 +102,6 @@ public class UserService {
         return updatedUser;
     }
 
-
-
     public User approveUser(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
@@ -113,7 +115,8 @@ public class UserService {
     public List<String> changePassword(@Valid changePasswordDTO request, String token) {
         TokenValidationResponse validationResponse = jwtValidation.validateToken(token);
         if (!validationResponse.isValid()) {
-            return List.of("token: invalid token");}
+            return List.of("token: invalid token");
+        }
 
         User user = userRepository.findById(validationResponse.getUserId());
         if (user == null) {

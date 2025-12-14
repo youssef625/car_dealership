@@ -22,8 +22,11 @@ public class CarController {
     @Autowired
     private com.swe2.CarsManagement.client.TokenValidationClient tokenValidationClient;
 
+    @Autowired
+    private com.swe2.CarsManagement.client.OfferClient offerClient;
+
     @GetMapping
-    public ResponseEntity<Page<Car>> getAllCars(
+    public ResponseEntity<Page<com.swe2.CarsManagement.dto.CarResponseDTO>> getAllCars(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestHeader(value = "Authorization", required = false) String token) {
@@ -41,7 +44,22 @@ public class CarController {
             }
         }
 
-        return ResponseEntity.ok(carService.getAllCars(page, size, role));
+        Page<Car> cars = carService.getAllCars(page, size, role);
+        Page<com.swe2.CarsManagement.dto.CarResponseDTO> carDTOs = cars.map(car -> {
+            double lastOffer = 0.0;
+            try {
+                com.swe2.CarsManagement.client.OfferClient.OfferResponse offerResponse = offerClient
+                        .getHighestOffer(car.getId(), token);
+                if (offerResponse != null) {
+                    lastOffer = offerResponse.getPrice();
+                }
+            } catch (Exception e) {
+                // Ignore errors fetching offers, default to 0.0
+            }
+            return new com.swe2.CarsManagement.dto.CarResponseDTO(car, lastOffer);
+        });
+
+        return ResponseEntity.ok(carDTOs);
     }
 
     @GetMapping("/{id}")

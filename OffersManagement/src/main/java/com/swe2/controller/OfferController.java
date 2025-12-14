@@ -2,7 +2,7 @@ package com.swe2.controller;
 
 import com.swe2.DTO.carOfferForUser;
 import com.swe2.DTO.createOfferRequest;
-import com.swe2.DTO.offerbycar;
+
 import com.swe2.service.OfferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ public class OfferController {
     private OfferService offerService;
 
     @PostMapping
-    @com.swe2.aspect.RequiresRole("user")
+    @com.swe2.aspect.RequiresRole({ "user", "employee" })
     public Object createOffer(@RequestBody createOfferRequest offer, @RequestHeader("Authorization") String token) {
 
         List<String> errors = offerService.createOffer(offer, token);
@@ -41,32 +41,44 @@ public class OfferController {
 
     @GetMapping("/admin/approve/{id}")
     @com.swe2.aspect.RequiresRole({ "superAdmin", "employee" })
-    public Object approveOffer(@PathVariable Integer id) {
-        List<String> errors = offerService.approveOffer(id);
+    public Object approveOffer(@PathVariable Integer id, @RequestHeader("Authorization") String token) {
+        List<String> errors = offerService.approveOffer(id, token);
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(errors);
         }
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/admin/cancel/{id}")
+    @GetMapping("/admin/cancel/{carId}")
     @com.swe2.aspect.RequiresRole("superAdmin")
-    public Object cancelOffer(@PathVariable Integer id) {
-        List<String> errors = offerService.cancelOffer(id);
+    public Object cancelOffer(@PathVariable Integer carId, @RequestHeader("Authorization") String token) {
+        List<String> errors = offerService.cancelOffer(carId, token);
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(errors);
         }
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/admin/confirm/{id}")
+    @GetMapping("/admin/confirm/{carId}")
     @com.swe2.aspect.RequiresRole("superAdmin")
-    public Object confirmOffer(@PathVariable Integer id) {
-        List<String> errors = offerService.confirmOffer(id);
+    public Object confirmOffer(@PathVariable Integer carId, @RequestHeader("Authorization") String token) {
+        List<String> errors = offerService.confirmOffer(carId, token);
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(errors);
         }
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/my-cars")
+    @com.swe2.aspect.RequiresRole({ "user" })
+    public Object getUserCars(@RequestParam(value = "type", required = false) String type,
+            @RequestHeader("Authorization") String token) {
+        try {
+            List<com.swe2.DTO.UserCarResponse> cars = offerService.getUserCars(type, token);
+            return ResponseEntity.ok(cars);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @ExceptionHandler(RuntimeException.class)

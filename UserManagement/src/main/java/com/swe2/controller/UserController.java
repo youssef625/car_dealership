@@ -40,8 +40,8 @@ public class UserController {
             @RequestParam(defaultValue = "10") int size) {
         if (size > 50) {
             size = 50;
-        } else if (size > 0) {
-            size = 0;
+        } else if (size <= 0) {
+            size = 10;
         }
 
         if (page < 0) {
@@ -50,6 +50,16 @@ public class UserController {
         Page<User> users = userService.getAllUsers(page, size);
         Page<UserDTO> userDTOs = users.map(user -> new UserDTO(
                 user));
+        return ResponseEntity.ok(userDTOs);
+    }
+
+    @GetMapping("/unapproved-employees")
+    @com.swe2.aspect.RequiresRole("superAdmin")
+    public ResponseEntity<List<UserDTO>> getUnapprovedEmployees() {
+        List<User> users = userService.getUnapprovedEmployees();
+        List<UserDTO> userDTOs = users.stream()
+                .map(UserDTO::new)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(userDTOs);
     }
 
@@ -75,10 +85,10 @@ public class UserController {
 
     @GetMapping("/approve/{id}")
     @com.swe2.aspect.RequiresRole("superAdmin")
-    public ResponseEntity<User> approveUser(@PathVariable Integer id) {
+    public ResponseEntity<UserDTO> approveUser(@PathVariable Integer id) {
         try {
             User user = userService.approveUser(id);
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(new UserDTO(user));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -130,11 +140,11 @@ public class UserController {
 
     @GetMapping("/ban/{id}")
     @com.swe2.aspect.RequiresRole("superAdmin")
-    public ResponseEntity<User> ban(
+    public ResponseEntity<UserDTO> ban(
             @PathVariable Integer id) {
         try {
             User user = userService.banUser(id);
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(new UserDTO(user));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -142,11 +152,11 @@ public class UserController {
 
     @GetMapping("/unban/{id}")
     @com.swe2.aspect.RequiresRole("superAdmin")
-    public ResponseEntity<User> unBan(
+    public ResponseEntity<UserDTO> unBan(
             @PathVariable Integer id) {
         try {
             User user = userService.unBanUser(id);
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(new UserDTO(user));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
