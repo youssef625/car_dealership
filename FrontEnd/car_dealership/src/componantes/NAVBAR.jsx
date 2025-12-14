@@ -1,8 +1,23 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import 'bootstrap-icons/font/bootstrap-icons.css'; 
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const NAVBAR = () => {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId"); 
+    setIsLoggedIn(false);
+    navigate("/login");
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm fixed-top">
       <div className="container-fluid">
@@ -44,10 +59,18 @@ const NAVBAR = () => {
           </ul>
         </div>
 
-        {/* Right: Login / Signup */}
+        {/* Right: Login / Signup or Logout */}
         <div className="d-flex ms-auto">
-          <Link to="/login" className="btn btn-outline-primary me-2">Login</Link>
-          <Link to="/signup" className="btn btn-primary">Signup</Link>
+          {isLoggedIn ? (
+            <button className="btn btn-outline-danger" onClick={handleLogout}>
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link to="/login" className="btn btn-outline-primary me-2">Login</Link>
+              <Link to="/signup" className="btn btn-primary">Signup</Link>
+            </>
+          )}
         </div>
 
       </div>
