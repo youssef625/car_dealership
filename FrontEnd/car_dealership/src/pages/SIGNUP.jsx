@@ -26,7 +26,7 @@ const SIGNUP = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('https://c0d4289b83ae.ngrok-free.app/api/auth/register', {
+      const response = await fetch(`${import.meta.env.VITE_FINAL_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ const SIGNUP = () => {
         localStorage.setItem('token', data.token); 
       }
 
-      navigate('/login');
+      navigate('/');
     } catch (err) {
       console.error('Signup error:', err);
       setError(err.message);

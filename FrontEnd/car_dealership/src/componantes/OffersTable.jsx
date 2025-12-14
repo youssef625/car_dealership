@@ -1,73 +1,118 @@
+import { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 
-const OffersTable = ({ offers, setOffers }) => {
-  function handleReserveButtom(e, offerp) {
-    e.target.classList.toggle("d-none");
-    let newArr = offers.map((offer) => {
-      if (offer.id == offerp.id) {
-        return { ...offer, status: "reserved" };
+const OffersTable = ({ offers, setOffers, fetchOffers }) => {
+  const [role, setRole] = useState(""); // هنا هنخزن الدور
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const validateToken = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must login first.");
+        setLoading(false);
+        return;
       }
-      return offer;
-    });
-    setOffers(newArr);
-    //fetch offers with new state for back end
-  }
-  function handleConfirmButtom(offerp) {
-    let newArr = offers.map((offer) => {
-      if (offer.id == offerp.id) {
-        return { ...offer, status: "booked" };
+
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_FINAL_BASE_URL}/api/auth/validate`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error("Token validation failed");
+
+        const data = await res.json();
+        console.log("Validation response:", data);
+
+        if (data.valid) {
+          setRole(data.role);
+        } else {
+          alert("Invalid token");
+        }
+      } catch (error) {
+        console.error("Validation error:", error);
+        alert("Error validating token");
+      } finally {
+        setLoading(false);
       }
-      return offer;
-    });
-    setOffers(newArr);
-    //fetch offers with new state for back end
-  }
-  // function handleDeclineButton(offerp) {
+    };
 
-  //   const finalArr = offers
-  //     .filter((offer) => offer.id === offerp.id) 
-  //     .map((offer) => ({ ...offer, status: "available" }));
+    validateToken();
+  }, []);
 
-  //   const newArr = offers.filter((offer) => offer.id !== offerp.id);
+  const handleApproveButton = async (offer) => {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_FINAL_BASE_URL}/api/offers/admin/approve/${
+          offer.id
+        }`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error();
+      await fetchOffers();
+      alert("Offer approved");
+    } catch {
+      alert("Error approving offer");
+    }
+  };
 
-  //   setOffers(newArr);
+  const handleDeclineButton = async (offer) => {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_FINAL_BASE_URL}/api/offers/admin/cancel/${
+          offer.id
+        }`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error();
+      await fetchOffers();
+      alert("Offer declined");
+    } catch {
+      alert("Error declining offer");
+    }
+  };
 
-  //   console.log("Offer to send to backend:", finalArr);
-  // }
-  function handleDeclineButton(offerp) {
-    //updated version for offers
-    const updatedOffers = offers.map((offer) => {
-      if (offer.id === offerp.id) {
-        return { ...offer, status: "available" };
-      }
-      return offer;
-    });
-
-    //Array with all offers and updated offer
-    console.log("Offers with updated status:", updatedOffers);
-
-    //singleOffer if send to backend
-    const finalArr = updatedOffers.filter((offer) => offer.id === offerp.id);
-
-    //remove
-    const newArr = updatedOffers.filter((offer) => offer.id !== offerp.id);
-
-    //send offers to backend after removal
-    console.log("Offers after removing the updated offer:", newArr);
-
-    //for display
-    setOffers(newArr);
-  }
+  const handleConfirmButton = async (offer) => {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_FINAL_BASE_URL}/api/offers/admin/confirm/${
+          offer.id
+        }`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error();
+      await fetchOffers();
+      alert("Offer confirmed");
+    } catch {
+      alert("Error confirming offer");
+    }
+  };
 
   return (
     <div className="d-flex justify-content-center vh-100 align-items-baseline ">
       <table className="table table-striped-columns w-75">
         <thead className="">
           <tr className="">
-            <th scope="col">Customer name</th>
             <th scope="col">Car</th>
-            <th scope="col">Price</th>
+            <th scope="col">Model</th>
             <th scope="col">Status</th>
+            <th scope="col">Last Offer</th>
+
             <th scope="col">Action</th>
           </tr>
         </thead>
@@ -75,44 +120,41 @@ const OffersTable = ({ offers, setOffers }) => {
           {offers.map((offer, index) => {
             return (
               <tr key={index}>
-                <th scope="row">{offer.cusName}</th>
-                <td>{offer.car}</td>
-                <td>{offer.price + "$"}</td>
+                <th scope="row">{offer.make}</th>
+                <td>{offer.model}</td>
                 <td>{offer.status}</td>
-                {offer.status == "available" && (
-                  <td>
-                    <Button
-                      variant="warning"
-                      onClick={(e) => {
-                        handleReserveButtom(e, offer);
-                      }}
-                    >
-                      Reserve
-                    </Button>
-                  </td>
-                )}
-                {(offer.status == "reserved" ||
-                  offer.status == "booked" ||
-                  offer.status == "canceled") && (
-                  <td className="d-flex gap-3">
+                <td>{offer.lastOffer}</td>
+
+                <td className="d-flex gap-3">
+                  {/* APPROVE → لأي role لو status = AVAILABLE */}
+                  {offer.status === "AVAILABLE" && offer.lastOffer > 0 && (
                     <Button
                       variant="success"
-                      onClick={() => {
-                        handleConfirmButtom(offer);
-                      }}
+                      onClick={() => handleApproveButton(offer)}
                     >
-                      confirm
+                      Approve
                     </Button>
-                    <Button
-                      variant="danger"
-                      onClick={() => {
-                        handleDeclineButton(offer);
-                      }}
-                    >
-                      decline
-                    </Button>
-                  </td>
-                )}
+                  )}
+
+                  {/* CONFIRM + DECLINE → superAdmin بس لو status = RESERVED */}
+                  {offer.status === "RESERVED" && role === "superAdmin" && offer.lastOffer > 0 && (
+                    <>
+                      <Button
+                        variant="success"
+                        onClick={() => handleConfirmButton(offer)}
+                      >
+                        Confirm
+                      </Button>
+
+                      <Button
+                        variant="danger"
+                        onClick={() => handleDeclineButton(offer)}
+                      >
+                        Decline
+                      </Button>
+                    </>
+                  )}
+                </td>
               </tr>
             );
           })}

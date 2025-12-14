@@ -1,44 +1,85 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RequestsTable from "../../componantes/RequestsTable";
+
 const AssignEmp = () => {
-  const [requests, setRequests] = useState([
-    {
-      id: 1,
-      name: "Ahmed Attia",
-      email: "ahmed@example.com",
-      password: "123456",
-    },
-    {
-      id: 2,
-      name: "Hassan Mohamed",
-      email: "hassan@example.com",
-      password: "password123",
-    },
-    {
-      id: 3,
-      name: "Mostafa Ali",
-      email: "mostafa@example.com",
-      password: "mypassword",
-    },
-    {
-      id: 4,
-      name: "Yousef Nader",
-      email: "yousef@example.com",
-      password: "qwerty123",
-    },
-    {
-      id: 5,
-      name: "Abdallah Mahmoud",
-      email: "abdallah@example.com",
-      password: "pass789",
-    },
-  ]);
-  // function deleteRequest(request){
-  // }
-  function handleRequests(request) {
-    console.log(request); //waiting for fetch
-    setRequests((prev) => prev.filter((r) => r.id !== request.id));
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must login first.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          `${
+            import.meta.env.VITE_FINAL_BASE_URL
+          }/api/users/unapproved-employees`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch requests");
+
+        const data = await res.json();
+        setRequests(data);
+      } catch (error) {
+        console.error("Fetch error:", error);
+        alert("Error fetching requests");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRequests();
+  }, []);
+
+  async function handleRequests(request) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must login first.");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_FINAL_BASE_URL}/api/users/approve/${
+          request.id
+        }`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to approve user");
+
+      const data = await res.json();
+      console.log("Approved:", data);
+
+      setRequests((prev) => prev.filter((r) => r.id !== request.id));
+      handleRequests(request);
+    } catch (error) {
+      console.error("Approval error:", error);
+      alert("Error approving user");
+    }
   }
+
+  if (loading)
+    return (
+      <div className="text-center mt-5 text-danger">
+        <p>Loading requests...</p>
+      </div>
+    );
   return (
     <div className="mt-5">
       <h2 className="text-center text-danger">Assign employees</h2>

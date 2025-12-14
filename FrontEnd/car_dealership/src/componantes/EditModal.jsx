@@ -3,7 +3,8 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 const EditModal = ({ cars, car, setCars }) => {
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
+    const updatedCarData = cars.find((c) => c.id === car.id);
     e.preventDefault();
     if (
       !car.make ||
@@ -15,7 +16,34 @@ const EditModal = ({ cars, car, setCars }) => {
       alert("Please fill all fields");
       return;
     }
-    console.log(car);
+    const token = localStorage.getItem("token");
+    console.log(import.meta.env.VITE_BASE_URL);
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_FINAL_BASE_URL}/api/cars/${car.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(updatedCarData),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to update car");
+      }
+
+      const updatedCar = await res.json();
+      console.log("Updated:", updatedCar);
+      alert("Car updated successfully");
+      handleClose();
+    } catch (error) {
+      console.error("Update error:", error);
+      alert("Error updating car");
+    }
   }
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);

@@ -13,7 +13,7 @@ const PRODUCTES = () => {
         const token = localStorage.getItem("token");
 
         const res = await fetch(
-          "https://c0d4289b83ae.ngrok-free.app/api/cars",
+          `${import.meta.env.VITE_FINAL_BASE_URL}/api/cars`,
           {
             method: "GET",
             headers: {

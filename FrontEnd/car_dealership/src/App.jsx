@@ -1,34 +1,36 @@
-import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import 'bootstrap-icons/font/bootstrap-icons.css';
+import "./App.css";
 
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-
-// Pages
-import HOME from './pages/HOME';
-import LOGIN from './pages/LOGIN';
-import SIGNUP from './pages/SIGNUP';
-import PRODUCTES from './pages/PRODUCTES';
-import PRODUCT_PAGE from './pages/PRODUCT_PAGE';
-import ABOUTUS from './pages/ABOUTUS';
-import CONTACTUS from './pages/CONTACTUS';
-import ADMIN_REG from './pages/ADMIN_REG';
-
-// Admin
-import ADMIN from './componantes/ADMIN_NAV';
-import AddEmp from './pages/Dashboard/AddEmp';
-
-// Private route for regular protected pages
+import { Route, Navigate, BrowserRouter, Routes } from "react-router-dom";
+import HOME from "./pages/HOME";
+import LOGIN from "./pages/LOGIN";
+import SIGNUP from "./pages/SIGNUP";
+import PRODUCTES from "./pages/PRODUCTES";
+import PRODUCT_PAGE from "./pages/PRODUCT_PAGE";
+import ABOUTUS from "./pages/ABOUTUS";
+import CONTACTUS from "./pages/CONTACTUS";
+import ADMIN_REG from "./pages/ADMIN_REG";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import React, { useState } from "react";
+import ADMIN_NAV from "./componantes/ADMIN_NAV.jsx";
+import EditCar from "./pages/Dashboard/EditCar";
+import AssignEmp from "./pages/Dashboard/AssignEmp.jsx";
+import DeleteCar from "./pages/Dashboard/DeleteCar.jsx";
+import Offers from "./pages/Dashboard/Offers.jsx";
+import Users from "./pages/Dashboard/Users.jsx";
+import EmpLayout from "./pages/employee/EmpLayout.jsx";
+import LoginAdminEmp from "./pages/Dashboard/LoginAdminEmp.jsx";
+import SignUpEmp from "./pages/employee/SignUpEmp.jsx";
+import ADMIN from "./pages/Dashboard/ADMIN.jsx";
 const PrivateRoute = ({ children }) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" replace />;
 };
 
 // Special route for admin register
 const AdminRegisterRoute = ({ children }) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   // Allow access if token exists
   if (token) return children;
@@ -39,37 +41,11 @@ const AdminRegisterRoute = ({ children }) => {
 
   return <Navigate to="/login" replace />;
 };
-import "./App.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
-import "bootstrap-icons/font/bootstrap-icons.css";
-import React, { useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import HOME from "./pages/HOME";
-import LOGIN from "./pages/LOGIN";
-import SIGNUP from "./pages/SIGNUP";
-import PRODUCTES from "./pages/PRODUCTES";
-import PRODUCT_PAGE from "./pages/PRODUCT_PAGE";
-import ABOUTUS from "./pages/ABOUTUS";
-import CONTACTUS from "./pages/CONTACTUS";
-import ADMIN_NAV from "./componantes/ADMIN_NAV.jsx";
-import EditCar from "./pages/Dashboard/EditCar";
-import AssignEmp from "./pages/Dashboard/AssignEmp.jsx";
-import DeleteCar from "./pages/Dashboard/DeleteCar.jsx";
-import Offers from "./pages/Dashboard/Offers.jsx";
-import Users from "./pages/Dashboard/Users.jsx";
-import EmpLayout from "./pages/employee/EmpLayout.jsx";
-import LoginAdminEmp from "./pages/Dashboard/LoginAdminEmp.jsx";
-import SignUpAdmin from "./pages/Dashboard/SignUpAdmin.jsx";
-import SignUpEmp from "./pages/employee/SignUpEmp.jsx";
-import ADMIN from "./pages/Dashboard/ADMIN.jsx";
-
 function App() {
- const [cars, setCars] = useState([]);
+  const [cars, setCars] = useState([]);
   return (
     <BrowserRouter>
       <Routes>
-
         {/* Public */}
         <Route path="/" element={<HOME />} />
         <Route path="/login" element={<LOGIN />} />
@@ -78,17 +54,6 @@ function App() {
         <Route path="/car/:id" element={<PRODUCT_PAGE />} />
         <Route path="/about" element={<ABOUTUS />} />
         <Route path="/contact" element={<CONTACTUS />} />
-
-        {/* Admin */}
-        <Route
-          path="/admin"
-          element={
-            <PrivateRoute>
-              <ADMIN />
-            </PrivateRoute>
-          }
-        />
-
         <Route
           path="/admin/register"
           element={
@@ -97,19 +62,96 @@ function App() {
             </AdminRegisterRoute>
           }
         />
-
+        {/*Admin*/}
         <Route
-          path="/admin/add-employee"
+          path="/admin/*"
           element={
             <PrivateRoute>
-              <AddEmp />
+              <ADMIN_NAV />
             </PrivateRoute>
           }
-        />
+        >
+          <Route index element={<ADMIN />} />
 
+          <Route
+            path="assignEmp"
+            element={
+              <PrivateRoute>
+                <AssignEmp />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="editCar"
+            element={
+              <PrivateRoute>
+                <EditCar setCars={setCars} cars={cars} />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="deleteCar"
+            element={
+              <PrivateRoute>
+                <DeleteCar />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="offers"
+            element={
+              <PrivateRoute>
+                <Offers />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="users"
+            element={
+              <PrivateRoute>
+                <Users />
+              </PrivateRoute>
+            }
+          />
+        </Route>
+        {/*employee*/}
+        <Route
+          path="/emp/*"
+          element={
+            <PrivateRoute>
+              <EmpLayout />
+            </PrivateRoute>
+          }
+        >
+          <Route index element={<ADMIN />} />
+          <Route
+            path="editCar"
+            element={
+              <PrivateRoute>
+                <EditCar setCars={setCars} cars={cars} />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="deleteCar"
+            element={
+              <PrivateRoute>
+                <DeleteCar  />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="offers"
+            element={
+              <PrivateRoute>
+                <Offers />
+              </PrivateRoute>
+            }
+          />
+        </Route>
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
-
       </Routes>
     </BrowserRouter>
   );

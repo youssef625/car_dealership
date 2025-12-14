@@ -1,49 +1,58 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import OffersTable from "../../componantes/OffersTable";
 
 const Offers = () => {
-  const [offers, setOffers] = useState([
-    {
-      id: 1,
-      cusName: "Ahmed Attia",
-      car: "Toyota Corolla 2020",
-      price: 15500,
-      status: "available",
-    },
-    {
-      id: 2,
-      cusName: "Hassan Mohamed",
-      car: "Honda Civic 2019",
-      price: 14500,
-      status: "reserved",
-    },
-    {
-      id: 3,
-      cusName: "Mostafa Ali",
-      car: "Ford Mustang 2021",
-      price: 31000,
-      status: "canceled",
-    },
-    {
-      id: 4,
-      cusName: "Yousef Nader",
-      car: "Toyota Corolla 2020",
-      price: 15000,
-      status: "available",
-    },
-    {
-      id: 5,
-      cusName: "Abdallah Mahmoud",
-      car: "Honda Civic 2019",
-      price: 14200,
-      status: "booked",
-    },
-  ]);
+  const [loading, setLoading] = useState(true);
+  const [offers, setOffers] = useState([]);
+  const fetchOffers = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must login first.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_FINAL_BASE_URL}/api/cars`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Offers not found");
+
+      const data = await res.json();
+      setOffers(data.content);
+    } catch (err) {
+      console.error("Error fetching offers:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOffers();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="text-center mt-5 text-danger">
+        <p>Loading offers...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-5">
       <h2 className="text-center text-danger">Offers</h2>
-      <OffersTable offers={offers} setOffers={setOffers}/>
+      <OffersTable
+        offers={offers}
+        setOffers={setOffers}
+        fetchOffers={fetchOffers}
+      />
     </div>
   );
 };

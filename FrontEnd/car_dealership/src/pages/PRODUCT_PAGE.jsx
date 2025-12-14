@@ -13,7 +13,8 @@ const PRODUCT_PAGE = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
 
-  const API = "https://c0d4289b83ae.ngrok-free.app";
+  const API = import.meta.env.VITE_FINAL_BASE_URL;
+  console.log(API);
 
   useEffect(() => {
     const fetchCar = async () => {
@@ -99,7 +100,6 @@ const PRODUCT_PAGE = () => {
       <div className="full-width-page">
         <div className="container-fluid px-5 mt-5">
           <div className="row g-4">
-
             {/* Product Images */}
             <div className="col-md-6">
               <img src={mainImage} alt="Car" className="product-image mb-3" />
@@ -109,7 +109,9 @@ const PRODUCT_PAGE = () => {
                     key={index}
                     src={img}
                     alt={`Thumbnail ${index}`}
-                    className={`thumbnail rounded ${mainImage === img ? "active" : ""}`}
+                    className={`thumbnail rounded ${
+                      mainImage === img ? "active" : ""
+                    }`}
                     onClick={() => setMainImage(img)}
                   />
                 ))}
@@ -118,11 +120,19 @@ const PRODUCT_PAGE = () => {
 
             {/* Car Details */}
             <div className="col-md-6 d-flex flex-column justify-content-start">
-              <h2 className="mb-3">{car.make} {car.model} ({car.year})</h2>
+              <h2 className="mb-3">
+                {car.make} {car.model} ({car.year})
+              </h2>
 
               <p className="text-muted mb-2">
                 Status:{" "}
-                <span className={car.status === "AVAILABLE" ? "text-success" : "text-danger fw-bold"}>
+                <span
+                  className={
+                    car.status === "AVAILABLE"
+                      ? "text-success"
+                      : "text-danger fw-bold"
+                  }
+                >
                   {car.status}
                 </span>
               </p>
@@ -161,12 +171,11 @@ const PRODUCT_PAGE = () => {
               {/* Last Offer */}
               {lastOffer !== null && (
                 <p className="text-muted mt-2">
-                  Your last offer: <strong>${lastOffer.toLocaleString()}</strong>
+                  Your last offer:{" "}
+                  <strong>${lastOffer.toLocaleString()}</strong>
                 </p>
               )}
-
             </div>
-
           </div>
         </div>
       </div>

@@ -27,7 +27,7 @@ const ADMIN_REG = () => {
 
     try {
       const response = await fetch(
-        'https://c0d4289b83ae.ngrok-free.app/api/auth/admin/register',
+        `${import.meta.env.VITE_FINAL_BASE_URL}/api/auth/admin/register`,
         {
           method: 'POST',
           headers: {
@@ -55,7 +55,7 @@ const ADMIN_REG = () => {
         localStorage.setItem('token', data.token);
       }
 
-      navigate('/login'); // or '/admin/login'
+      navigate('/emp'); // or '/admin/login'
     } catch (err) {
       console.error('Admin register error:', err);
       setError(err.message);

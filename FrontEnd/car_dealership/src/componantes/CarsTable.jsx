@@ -1,6 +1,6 @@
 import Button from "react-bootstrap/Button";
 
-const CarsTable = ({ cars,deleteCar }) => {
+const CarsTable = ({ listCars,deleteCar }) => {
   return (
     <div className="d-flex justify-content-center vh-100 align-items-baseline">
       <table className="table table-striped-columns w-75">
@@ -13,7 +13,7 @@ const CarsTable = ({ cars,deleteCar }) => {
           </tr>
         </thead>
         <tbody>
-          {cars.map((car, index) => {
+          {listCars.map((car, index) => {
             return (
               <tr key={index}>
                 <th scope="row">{car.model}</th>

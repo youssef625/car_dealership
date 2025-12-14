@@ -15,7 +15,7 @@ const LOGIN = () => {
 
     try {
       const res = await fetch(
-        "https://c0d4289b83ae.ngrok-free.app/api/auth/login",
+        `${import.meta.env.VITE_FINAL_BASE_URL}/api/auth/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -37,8 +37,10 @@ const LOGIN = () => {
       localStorage.setItem("email", data.email);
 
       // Redirect based on role
-      if (data.role === "admin" || data.role === "employee") {
+      if (data.role === "superAdmin") {
         navigate("/admin"); // Admin dashboard
+      } else if (data.role === "employee") {
+        navigate("/emp");
       } else {
         navigate("/"); // Normal user homepage
       }
