@@ -16,4 +16,6 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
     carOfferForUser findMaxPriceAndCountByCarId(@Param("carId") int carId);
 
     Offer findTopByCarIdAndStatusNotOrderByPriceDesc(int carId, com.swe2.model.OfferStatus status);
+
+    java.util.List<Offer> findByUserIdAndStatus(int userId, com.swe2.model.OfferStatus status);
 }

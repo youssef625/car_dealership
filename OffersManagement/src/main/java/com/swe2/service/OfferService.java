@@ -102,4 +102,54 @@ public class OfferService {
         }
         return List.of();
     }
+
+    public List<com.swe2.DTO.UserCarResponse> getUserCars(String status, String token) {
+        TokenValidationResponse validationResponse = tokenvalidation.validateToken(token);
+        int userId = validationResponse.getUserId();
+        List<Offer> offers = new java.util.ArrayList<>();
+
+        if (status == null || status.isEmpty() || "all".equalsIgnoreCase(status)) {
+            offers.addAll(offerRepository.findByUserIdAndStatus(userId, com.swe2.model.OfferStatus.APPROVED));
+            offers.addAll(offerRepository.findByUserIdAndStatus(userId, com.swe2.model.OfferStatus.CONFIRMED));
+            offers.addAll(offerRepository.findByUserIdAndStatus(userId, com.swe2.model.OfferStatus.PENDING));
+        } else {
+            com.swe2.model.OfferStatus offerStatus;
+            if ("reserved".equalsIgnoreCase(status)) {
+                offerStatus = com.swe2.model.OfferStatus.APPROVED;
+            } else if ("sold".equalsIgnoreCase(status)) {
+                offerStatus = com.swe2.model.OfferStatus.CONFIRMED;
+            } else if ("pending".equalsIgnoreCase(status)) {
+                offerStatus = com.swe2.model.OfferStatus.PENDING;
+            } else {
+                throw new IllegalArgumentException(
+                        "Invalid status type. Use 'reserved', 'sold', 'pending', or leave empty for all.");
+            }
+            offers = offerRepository.findByUserIdAndStatus(userId, offerStatus);
+        }
+
+        List<com.swe2.DTO.UserCarResponse> response = new java.util.ArrayList<>();
+
+        for (Offer offer : offers) {
+            try {
+                com.swe2.DTO.CarDTO car = carClient.getCarById((long) offer.getCarId());
+                if (car != null) {
+                    boolean isWinning = true;
+                    if (offer.getStatus() == com.swe2.model.OfferStatus.PENDING) {
+                        Offer highestOffer = offerRepository.findTopByCarIdAndStatusNotOrderByPriceDesc(
+                                offer.getCarId(),
+                                com.swe2.model.OfferStatus.CANCELLED);
+                        if (highestOffer != null && highestOffer.getPrice() > offer.getPrice()) {
+                            isWinning = false;
+                        }
+                    }
+                    response.add(new com.swe2.DTO.UserCarResponse(car, isWinning, offer.getPrice()));
+                }
+            } catch (Exception e) {
+                // Log error or skip car if fetching fails
+                System.err
+                        .println("Failed to fetch car details for offer " + offer.getOfferId() + ": " + e.getMessage());
+            }
+        }
+        return response;
+    }
 }
